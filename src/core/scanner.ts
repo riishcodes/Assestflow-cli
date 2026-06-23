@@ -65,14 +65,19 @@ export async function scanDirectories(
     stats: false,
   });
 
-  // Map absolute paths back to ScannedFile format
-  return files.map((absPath) => {
-    const relativePath = path.relative(projectRoot, absPath);
-    const extension = path.extname(absPath).slice(1).toLowerCase();
-    return {
-      absolutePath: path.resolve(absPath),
-      relativePath: relativePath.replace(/\\/g, '/'), // uniform forward slashes for relative paths
-      extension,
-    };
-  });
+  // Map absolute paths back to ScannedFile format and filter out any path traversal attempts
+  return files
+    .map((absPath) => {
+      const relativePath = path.relative(projectRoot, absPath);
+      const extension = path.extname(absPath).slice(1).toLowerCase();
+      return {
+        absolutePath: path.resolve(absPath),
+        relativePath: relativePath.replace(/\\/g, '/'), // uniform forward slashes for relative paths
+        extension,
+      };
+    })
+    .filter((file) => {
+      // Must not escape the project root (no ".." prefix and not absolute outside root)
+      return !file.relativePath.startsWith('..') && !path.isAbsolute(file.relativePath);
+    });
 }

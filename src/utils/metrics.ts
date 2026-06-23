@@ -2,7 +2,12 @@ import prettyBytes from 'pretty-bytes';
 import type { OptimizationResult } from '../core/optimizer.js';
 
 export interface ReportSummary {
-  totalImages: number;
+  sourceImages: number;
+  generatedAssets: number;
+  optimizedCount: number;
+  cacheSkippedCount: number;
+  largerOutputSkippedCount: number;
+  errorCount: number;
   originalSize: number;
   optimizedSize: number;
   spaceSaved: number;
@@ -22,7 +27,13 @@ export function compileSummary(
   results: OptimizationResult[],
   executionTimeMs: number
 ): ReportSummary {
-  let totalImages = 0;
+  let sourceImages = results.length;
+  let optimizedCount = 0;
+  let cacheSkippedCount = 0;
+  let largerOutputSkippedCount = 0;
+  let errorCount = 0;
+  let generatedAssets = 0;
+
   let originalSize = 0;
   let optimizedSize = 0;
   const failedFiles: { path: string; error: string }[] = [];
@@ -32,6 +43,7 @@ export function compileSummary(
 
   for (const res of results) {
     if (!res.success) {
+      errorCount++;
       failedFiles.push({
         path: res.relativePath,
         error: res.error || 'Unknown error',
@@ -39,18 +51,27 @@ export function compileSummary(
       continue;
     }
 
-    totalImages++;
+    if (res.skipped) {
+      cacheSkippedCount++;
+    } else if (res.optimizedFiles.length === 0) {
+      largerOutputSkippedCount++;
+    } else {
+      optimizedCount++;
+    }
+
+    generatedAssets += res.optimizedFiles.length;
     originalSize += res.originalSize;
 
-    // Track the total size of all output files generated for this image
+    // Track the total size of all output files generated/saved for this image
     let imageOutputSize = 0;
     for (const opt of res.optimizedFiles) {
       imageOutputSize += opt.size;
     }
 
-    optimizedSize += imageOutputSize;
+    const effectiveOptimizedSize = res.optimizedFiles.length > 0 ? imageOutputSize : res.originalSize;
+    optimizedSize += effectiveOptimizedSize;
 
-    const saved = res.originalSize - imageOutputSize;
+    const saved = res.originalSize - effectiveOptimizedSize;
 
     assetsSizes.push({
       path: res.relativePath,
@@ -80,7 +101,12 @@ export function compileSummary(
     .slice(0, 3);
 
   return {
-    totalImages,
+    sourceImages,
+    generatedAssets,
+    optimizedCount,
+    cacheSkippedCount,
+    largerOutputSkippedCount,
+    errorCount,
     originalSize,
     optimizedSize,
     spaceSaved,

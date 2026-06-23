@@ -56,4 +56,26 @@ describe('Cache Manager & historical Comparisons', () => {
     expect(delta.sizeSavedBytes).toBe(524288);
     expect(delta.imageCountDelta).toBe(2);
   });
+
+  it('should accurately compare scores when health score is 0', () => {
+    const previous = {
+      images: 5,
+      totalSize: '1.0 MB',
+      totalSizeBytes: 1048576,
+      healthScore: 0,
+      timestamp: new Date().toISOString(),
+      hashes: {},
+    };
+
+    const delta = compareCache(0, 1048576, 5, previous);
+    expect(delta.scoreImprovement).toBe(0); // Should be 0, not 100
+  });
+
+  it('should handle null previous cache on comparison', () => {
+    const delta = compareCache(90, 1048576, 5, null);
+    expect(delta.previousScore).toBeNull();
+    expect(delta.scoreImprovement).toBeNull();
+    expect(delta.sizeSavedBytes).toBeNull();
+    expect(delta.imageCountDelta).toBeNull();
+  });
 });

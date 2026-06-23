@@ -33,7 +33,7 @@ describe('AssetFlow CLI — E2E Command Integration', () => {
   it('should run optimization and write WebP files to disk', async () => {
     const { stdout } = await execa('node', [cliBinary], { cwd: root });
 
-    expect(stdout).toContain('Processed Images:   2');
+    expect(stdout).toContain('Source Images:');
     expect(stdout).toContain('AssetFlow CLI — Optimization Summary');
     
     // Verify WebP files exist
@@ -54,8 +54,10 @@ describe('AssetFlow CLI — E2E Command Integration', () => {
 
     const reportContent = await fs.readFile(reportPath, 'utf8');
     const parsed = JSON.parse(reportContent);
-    expect(parsed.summary.totalOriginalImages).toBe(2);
+    expect(parsed.summary.sourceImages).toBe(2);
     expect(parsed.healthScore).toBe(100); // 100 since WebPs now exist!
+    expect(parsed.version).toBe('0.1.0');
+    expect(parsed.config).toBeDefined();
   });
 
   it('should run doctor command and return health status info', async () => {
@@ -63,7 +65,12 @@ describe('AssetFlow CLI — E2E Command Integration', () => {
 
     expect(stdout).toContain('Project Image Audit');
     expect(stdout).toContain('Project Health Score');
-    expect(stdout).toContain('Largest Assets');
+    expect(stdout).toContain('Source Images:');
+    expect(stdout).toContain('Generated Assets:');
+    expect(stdout).toContain('Total Files Detected:');
+    expect(stdout).toContain('Top 10 Largest Files');
+    expect(stdout).toContain('Top 10 Savings Opportunities');
+    expect(stdout).toContain('Folder Breakdown');
     expect(stdout).toContain('Recommendations');
   });
 
@@ -71,9 +78,38 @@ describe('AssetFlow CLI — E2E Command Integration', () => {
     const { stdout } = await execa('node', [cliBinary, 'report'], { cwd: root });
 
     expect(stdout).toContain('Last Optimization Report');
-    expect(stdout).toContain('Total Scanned Images:   2');
+    expect(stdout).toContain('Source Images:');
+    expect(stdout).toContain('Generated Assets:');
     expect(stdout).toContain('Original Total Size');
     expect(stdout).toContain('Space Saved');
+    expect(stdout).toContain('Largest Saving Asset');
+    expect(stdout).toContain('Average Savings Per File');
+    expect(stdout).toContain('Folder-Level Savings Breakdown');
+  });
+
+  it('should run report command with --json and output raw JSON', async () => {
+    const { stdout } = await execa('node', [cliBinary, 'report', '--json'], { cwd: root });
+
+    const parsed = JSON.parse(stdout);
+    expect(parsed.summary).toBeDefined();
+    expect(parsed.healthScore).toBeDefined();
+    expect(parsed.timestamp).toBeDefined();
+  });
+
+  it('should run init command and create config file', async () => {
+    const configPath = path.join(root, 'assetflow.config.json');
+    await fs.rm(configPath, { force: true });
+
+    const { stdout } = await execa('node', [cliBinary, 'init'], { cwd: root });
+    expect(stdout).toContain('Created assetflow.config.json');
+
+    const exists = await fs.stat(configPath).then(() => true).catch(() => false);
+    expect(exists).toBe(true);
+
+    const configContent = await fs.readFile(configPath, 'utf8');
+    const parsed = JSON.parse(configContent);
+    expect(parsed.format).toBe('webp');
+    expect(parsed.quality).toBe(80);
   });
 
   it('should run watch mode and auto-optimize added images', async () => {

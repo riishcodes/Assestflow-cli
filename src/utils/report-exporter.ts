@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { OptimizationResult } from '../core/optimizer.js';
 import { getReductionPercentage } from './metrics.js';
+import type { AssetFlowConfig } from '../config/schema.js';
 
 export interface ReportFileItem {
   filePath: string;
@@ -20,13 +21,22 @@ export interface ReportFileItem {
 }
 
 export interface ReportJsonData {
-  timestamp: string;
+  version: string;
+  generatedAt: string;
+  config: AssetFlowConfig;
+  timestamp: string; // backward compatibility
   summary: {
-    totalOriginalImages: number;
+    totalOriginalImages: number; // backward compatibility
     totalOriginalSize: number;
     totalOptimizedSize: number;
     spaceSaved: number;
     averageReduction: number;
+    sourceImages: number;
+    generatedAssets: number;
+    optimizedCount: number;
+    cacheSkippedCount: number;
+    largerOutputSkippedCount: number;
+    errorCount: number;
   };
   files: ReportFileItem[];
   warnings: string[];
@@ -38,12 +48,14 @@ export interface ReportJsonData {
  * Saves a detailed run report to assetflow-report.json in the project root.
  * @param projectRoot Base directory of the project
  * @param results File optimization results
+ * @param config Configuration used during optimization
  * @param healthScore Determined health score (optional)
  * @param recommendations Custom tips generated (optional)
  */
 export async function exportReportJson(
   projectRoot: string,
   results: OptimizationResult[],
+  config: AssetFlowConfig,
   healthScore: number | null = null,
   recommendations: string[] = []
 ): Promise<string> {
@@ -51,15 +63,30 @@ export async function exportReportJson(
 
   let totalOriginalSize = 0;
   let totalOptimizedSize = 0;
-  let totalOriginalImages = 0;
+  let sourceImages = results.length;
+  let optimizedCount = 0;
+  let cacheSkippedCount = 0;
+  let largerOutputSkippedCount = 0;
+  let errorCount = 0;
+  let generatedAssets = 0;
 
   const filesList: ReportFileItem[] = results.map((res) => {
-    totalOriginalImages++;
     totalOriginalSize += res.originalSize;
+
+    if (!res.success) {
+      errorCount++;
+    } else if (res.skipped) {
+      cacheSkippedCount++;
+    } else if (res.optimizedFiles.length === 0) {
+      largerOutputSkippedCount++;
+    } else {
+      optimizedCount++;
+    }
 
     let imageOutputSize = 0;
     const outputs = res.optimizedFiles.map((opt) => {
       imageOutputSize += opt.size;
+      generatedAssets++;
       return {
         path: opt.relativePath,
         size: opt.size,
@@ -69,13 +96,14 @@ export async function exportReportJson(
       };
     });
 
-    totalOptimizedSize += res.success ? imageOutputSize : res.originalSize;
+    const effectiveOptimizedSize = res.success && res.optimizedFiles.length > 0 ? imageOutputSize : res.originalSize;
+    totalOptimizedSize += effectiveOptimizedSize;
 
     return {
       filePath: res.relativePath,
       originalSize: res.originalSize,
-      optimizedSize: res.success ? imageOutputSize : res.originalSize,
-      reductionPercentage: res.success ? getReductionPercentage(res.originalSize, imageOutputSize) : 0,
+      optimizedSize: effectiveOptimizedSize,
+      reductionPercentage: res.success && res.optimizedFiles.length > 0 ? getReductionPercentage(res.originalSize, imageOutputSize) : 0,
       success: res.success,
       error: res.error,
       outputs,
@@ -95,13 +123,22 @@ export async function exportReportJson(
   }
 
   const reportData: ReportJsonData = {
+    version: '0.1.0',
+    generatedAt: new Date().toISOString(),
+    config,
     timestamp: new Date().toISOString(),
     summary: {
-      totalOriginalImages,
+      totalOriginalImages: sourceImages,
       totalOriginalSize,
       totalOptimizedSize,
       spaceSaved,
       averageReduction: Math.round(averageReduction),
+      sourceImages,
+      generatedAssets,
+      optimizedCount,
+      cacheSkippedCount,
+      largerOutputSkippedCount,
+      errorCount,
     },
     files: filesList,
     warnings,

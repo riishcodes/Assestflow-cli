@@ -31,7 +31,7 @@ describe('Image Optimizer Engine', () => {
     expect(result.success).toBe(true);
     expect(result.optimizedFiles.length).toBe(1);
     expect(result.optimizedFiles[0].format).toBe('webp');
-    expect(result.optimizedFiles[0].width).toBe(100);
+    expect(result.optimizedFiles[0].width).toBe(300);
 
     // Check that output WebP file exists on disk
     const expectedOutput = path.join(root, 'public', 'images', 'hero.webp');

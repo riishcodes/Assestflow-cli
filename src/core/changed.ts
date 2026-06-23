@@ -44,14 +44,19 @@ export async function getChangedFiles(projectRoot: string): Promise<string[] | n
 
     const resultPaths: string[] = [];
 
-    // Filter to ensure target files exist on the filesystem
+    // Filter to ensure target files exist on the filesystem and do not escape root
     for (const relPath of combinedList) {
       const absPath = path.resolve(projectRoot, relPath);
+      const normalizedRel = path.relative(projectRoot, absPath).replace(/\\/g, '/');
+      
+      if (normalizedRel.startsWith('..') || path.isAbsolute(normalizedRel)) {
+        continue; // Skip any path traversal attempt
+      }
+
       try {
         const stats = await fs.stat(absPath);
         if (stats.isFile()) {
-          // Normalize paths to forward slashes
-          resultPaths.push(relPath.replace(/\\/g, '/'));
+          resultPaths.push(normalizedRel);
         }
       } catch {
         // File does not exist, was likely deleted

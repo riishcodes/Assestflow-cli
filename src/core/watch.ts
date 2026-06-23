@@ -62,6 +62,10 @@ export function startWatcher(
 
     try {
       const relPath = path.relative(projectRoot, filePath).replace(/\\/g, '/');
+      if (relPath.startsWith('..') || path.isAbsolute(relPath)) {
+        return; // Ignore file changes outside projectRoot
+      }
+
       const scanned = {
         absolutePath: path.resolve(filePath),
         relativePath: relPath,

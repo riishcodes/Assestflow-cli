@@ -23,6 +23,7 @@ export interface OptimizationResult {
   error: string | null;
   hash?: string;
   skipped?: boolean;
+  skippedLargerFiles?: { format: 'webp' | 'avif'; size: number }[];
 }
 
 /**
@@ -207,27 +208,29 @@ export async function optimizeImage(
         const outputPath = path.join(dirName, outputFilename);
         const relativeOutputPath = path.relative(projectRoot, outputPath).replace(/\\/g, '/');
 
-        let outputSize = 0;
+        // Process in-memory first for size comparison
+        const buffer = await pipeline.toBuffer();
+        const outputSize = buffer.length;
 
-        if (options.dryRun) {
-          // Process in-memory buffer to check exact size for dry-run estimation
-          const buffer = await pipeline.toBuffer();
-          outputSize = buffer.length;
+        if (outputSize >= result.originalSize) {
+          if (!result.skippedLargerFiles) {
+            result.skippedLargerFiles = [];
+          }
+          result.skippedLargerFiles.push({ format, size: outputSize });
         } else {
-          // Write directly to file
-          await pipeline.toFile(outputPath);
-          const outStats = await fs.stat(outputPath);
-          outputSize = outStats.size;
-        }
+          if (!options.dryRun) {
+            await fs.writeFile(outputPath, buffer);
+          }
 
-        result.optimizedFiles.push({
-          outputPath,
-          relativePath: relativeOutputPath,
-          size: outputSize,
-          format,
-          width: targetWidth,
-          height: targetHeight,
-        });
+          result.optimizedFiles.push({
+            outputPath,
+            relativePath: relativeOutputPath,
+            size: outputSize,
+            format,
+            width: targetWidth,
+            height: targetHeight,
+          });
+        }
       }
     }
 

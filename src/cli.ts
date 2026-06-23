@@ -13,6 +13,70 @@ import { compileSummary, formatSize } from './utils/metrics.js';
 import * as logger from './utils/logger.js';
 import chalk from 'chalk';
 
+/**
+ * Automatically detects framework type in the project root.
+ */
+async function detectProjectType(projectRoot: string): Promise<string> {
+  try {
+    const files = await fs.readdir(projectRoot);
+    if (files.includes('next.config.ts') || files.includes('next.config.js') || files.includes('next.config.mjs')) {
+      return 'Next.js';
+    }
+    if (files.includes('vite.config.ts') || files.includes('vite.config.js') || files.includes('vite.config.mjs')) {
+      return 'Vite';
+    }
+    if (files.includes('astro.config.mjs') || files.includes('astro.config.ts')) {
+      return 'Astro';
+    }
+    try {
+      const pkgPath = path.join(projectRoot, 'package.json');
+      const raw = await fs.readFile(pkgPath, 'utf8');
+      const pkg = JSON.parse(raw);
+      const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+      if (deps['next']) return 'Next.js';
+      if (deps['astro']) return 'Astro';
+      if (deps['vite']) return 'Vite';
+      if (deps['react']) return 'React';
+      if (deps['vue']) return 'Vue';
+    } catch {
+      // Ignore package.json read failures
+    }
+    return 'Unknown Project';
+  } catch {
+    return 'Unknown Project';
+  }
+}
+
+/**
+ * Renders a premium startup sequence under 800ms.
+ */
+async function playStartupSequence(version: string, framework: string, mode: string): Promise<void> {
+  console.log(`\n  ${chalk.cyan.bold('AssetFlow')} v${version}`);
+  console.log(`  ${chalk.gray('Project:')} ${chalk.white(framework)}`);
+  console.log(`  ${chalk.gray('Mode:')}    ${chalk.white(mode)}`);
+  console.log(chalk.cyan('  ──────────────────────────────────────────'));
+  
+  const steps = [
+    'Project detected',
+    'Configuration loaded',
+    'Asset discovery complete',
+    'Analysis complete'
+  ];
+  
+  if (logger.areAnimationsEnabled()) {
+    for (const step of steps) {
+      logger.startSpinner(step);
+      await new Promise(resolve => setTimeout(resolve, 150)); // 600ms total
+    }
+    logger.stopSpinner(true, 'Analysis complete');
+  } else {
+    for (const step of steps) {
+      console.log(`  ${chalk.green('✓')} ${step}`);
+    }
+  }
+  console.log('');
+}
+
 // Helper for parallel task limiting
 async function processInParallel<T, R>(
   items: T[],
@@ -69,7 +133,8 @@ export async function runCli(argv: string[], projectRoot: string): Promise<void>
     .option('-f, --format <webp|avif|both>', 'Output formats WebP, AVIF or both')
     .option('-q, --quality <number>', 'Override target compression quality (1-100)', (val) => parseInt(val, 10))
     .option('-p, --preset <balanced|quality|compression>', 'Compression presets')
-    .option('--force', 'Force reprocessing of all files, ignoring cached checksum hashes');
+    .option('--force', 'Force reprocessing of all files, ignoring cached checksum hashes')
+    .option('--no-animations', 'Disable startup animations and live progress bars');
 
   // Default optimize action
   program
@@ -82,7 +147,6 @@ export async function runCli(argv: string[], projectRoot: string): Promise<void>
     .command('optimize')
     .description('Discover and optimize image assets in the project')
     .action(async () => {
-      // CLI options are parsed globally, pass global options to handler
       await handleOptimizeCommand(projectRoot, program.opts());
     });
 
@@ -99,18 +163,49 @@ export async function runCli(argv: string[], projectRoot: string): Promise<void>
     .command('doctor')
     .description('Audit project image assets for optimization opportunities and calculate score')
     .action(async () => {
-      await handleDoctorCommand(projectRoot);
+      await handleDoctorCommand(projectRoot, program.opts());
     });
 
   // Report command
   program
     .command('report')
     .description('Display summary metrics and historical improvement comparison details')
+    .option('--json', 'Output raw JSON report metrics to stdout')
+    .action(async (cmdOptions) => {
+      await handleReportCommand(projectRoot, { ...program.opts(), ...cmdOptions });
+    });
+
+  // Init command
+  program
+    .command('init')
+    .description('Initialize assetflow.config.json with default settings')
     .action(async () => {
-      await handleReportCommand(projectRoot);
+      await handleInitCommand(projectRoot);
     });
 
   await program.parseAsync(argv);
+}
+
+/**
+ * Handles the "init" command flow.
+ */
+async function handleInitCommand(projectRoot: string): Promise<void> {
+  const configPath = path.join(projectRoot, 'assetflow.config.json');
+  try {
+    await fs.access(configPath);
+    logger.printWarning('assetflow.config.json already exists.');
+  } catch {
+    const defaultConfig = {
+      format: 'webp',
+      quality: 80,
+      preset: 'balanced',
+      responsive: false,
+      deleteOriginal: false,
+      keepMetadata: false
+    };
+    await fs.writeFile(configPath, JSON.stringify(defaultConfig, null, 2), 'utf8');
+    logger.printSuccess('Created assetflow.config.json with sensible defaults.');
+  }
 }
 
 /**
@@ -118,8 +213,19 @@ export async function runCli(argv: string[], projectRoot: string): Promise<void>
  */
 async function handleOptimizeCommand(projectRoot: string, options: any): Promise<void> {
   const startTime = Date.now();
+  const version = await getPackageVersion(projectRoot);
+  const framework = await detectProjectType(projectRoot);
+
+  // Configure animations based on flag and environment variables
+  const disableAnimations = options.animations === false ||
+    process.env.NO_COLOR !== undefined ||
+    process.env.TERM === 'dumb' ||
+    process.env.CI !== undefined;
+  logger.setAnimationsEnabled(!disableAnimations);
   
   try {
+    await playStartupSequence(version, framework, options.dryRun ? 'Dry Run' : 'Optimize');
+
     logger.startSpinner('Loading configuration...');
     const fileConfig = await loadConfig(projectRoot);
     const config = mergeConfig(fileConfig, options);
@@ -136,32 +242,49 @@ async function handleOptimizeCommand(projectRoot: string, options: any): Promise
         files = await scanDirectories(projectRoot, config);
       } else {
         logger.stopSpinner(true, `Found ${changedFilesList.length} changed path(s) in Git`);
-        
-        // Filter changed files to only scan paths inside our configured folders, ignoring excluded ones
         const allScanned = await scanDirectories(projectRoot, config);
         files = allScanned.filter(f => changedFilesList.includes(f.relativePath));
       }
     } else {
       logger.startSpinner('Scanning image directories...');
       files = await scanDirectories(projectRoot, config);
-      logger.stopSpinner(true, `Scan complete. Found ${files.length} candidate image(s)`);
+      logger.stopSpinner(true, 'Scan complete');
     }
 
-    // Filter list to only process source PNG, JPG, JPEG files
     const sourceImages = files.filter(f => ['png', 'jpg', 'jpeg'].includes(f.extension));
+    const generatedAssetsCount = files.length - sourceImages.length;
+
+    // Project detection card representation
+    logger.printProjectCard(
+      version,
+      framework,
+      sourceImages.length,
+      options.dryRun ? 'Dry Run' : 'Optimize',
+      generatedAssetsCount,
+      files.length
+    );
 
     if (sourceImages.length === 0) {
       logger.printWarning('No unoptimized PNG, JPG, or JPEG images found to process.');
       return;
     }
 
+    // Health score audit before optimizations
+    const auditBefore = await runDoctorAudit(files, config);
+
     const previousCache = await readCache(projectRoot);
     const cachedHashes = previousCache?.hashes || {};
 
-    console.log(`\n  ${chalk.cyan('Optimizing assets in parallel (limit: 4)...')}\n`);
+    console.log(`  ${chalk.cyan('Optimizing assets in parallel (limit: 4)...')}\n`);
 
     let completed = 0;
-    logger.startSpinner(`Optimizing ${completed}/${sourceImages.length} images...`);
+    const progressStartTime = Date.now();
+    
+    if (logger.areAnimationsEnabled()) {
+      logger.updateProgress(completed, sourceImages.length, '', progressStartTime);
+    } else {
+      logger.startSpinner(`Optimizing ${completed}/${sourceImages.length} images...`);
+    }
 
     const processedResults = await processInParallel(sourceImages, 4, async (file) => {
       const result = await optimizeImage(file, config, projectRoot, {
@@ -169,11 +292,19 @@ async function handleOptimizeCommand(projectRoot: string, options: any): Promise
         cachedHash: cachedHashes[file.relativePath]
       });
       completed++;
-      logger.updateSpinner(`Optimizing ${completed}/${sourceImages.length} images...`);
+      if (logger.areAnimationsEnabled()) {
+        logger.updateProgress(completed, sourceImages.length, file.relativePath, progressStartTime);
+      } else {
+        logger.updateSpinner(`Optimizing ${completed}/${sourceImages.length} images...`);
+      }
       return result;
     });
 
-    logger.stopSpinner(true, 'Optimization finished');
+    if (logger.areAnimationsEnabled()) {
+      logger.completeProgress(sourceImages.length);
+    } else {
+      logger.stopSpinner(true, 'Optimization finished');
+    }
 
     // Sequentially print rows to terminal for DX visual elegance
     let skippedCount = 0;
@@ -192,25 +323,30 @@ async function handleOptimizeCommand(projectRoot: string, options: any): Promise
 
     const executionTimeMs = Date.now() - startTime;
     const summary = compileSummary(processedResults, executionTimeMs);
-    logger.printSummaryCard(summary);
 
-    // Run audit to get health score and recommendations for final report
+    // Audit after to compile new score
     logger.startSpinner('Compiling report data...');
-    // Scan again to catch newly written files if not dryRun
-    const finalScan = await scanDirectories(projectRoot, config);
-    const audit = await runDoctorAudit(finalScan);
+    const finalScan = options.dryRun ? files : await scanDirectories(projectRoot, config);
+    const auditAfter = await runDoctorAudit(finalScan, config);
+    logger.stopSpinner(true, 'Report data compiled');
 
-    // Save report to JSON file
-    const reportPath = await exportReportJson(
-      projectRoot,
-      processedResults,
-      audit.healthScore,
-      audit.recommendations
-    );
-    logger.stopSpinner(true, `Report saved to: ${chalk.gray(path.basename(reportPath))}`);
+    // Rewards Dashboard Card
+    logger.printCompletionCard(summary, auditBefore.healthScore, auditAfter.healthScore);
+    
+    // Impact chart
+    logger.printSizeComparison(summary.originalSize, summary.optimizedSize);
 
-    // If not a dry run, update history fingerprint in .assetflow/cache.json
+    // Save report if not dry run
     if (!options.dryRun) {
+      const reportPath = await exportReportJson(
+        projectRoot,
+        processedResults,
+        config,
+        auditAfter.healthScore,
+        auditAfter.recommendations
+      );
+      logger.printSuccess(`Report saved to: ${chalk.gray(path.basename(reportPath))}`);
+
       const newHashes: Record<string, string> = { ...cachedHashes };
       for (const res of processedResults) {
         if (res.success && res.hash) {
@@ -219,10 +355,10 @@ async function handleOptimizeCommand(projectRoot: string, options: any): Promise
       }
 
       await writeCache(projectRoot, {
-        images: audit.totalImages,
-        totalSize: formatSize(audit.totalSize),
-        totalSizeBytes: audit.totalSize,
-        healthScore: audit.healthScore,
+        images: auditAfter.totalImages,
+        totalSize: formatSize(auditAfter.totalSize),
+        totalSizeBytes: auditAfter.totalSize,
+        healthScore: auditAfter.healthScore,
         hashes: newHashes,
       });
     }
@@ -237,6 +373,15 @@ async function handleOptimizeCommand(projectRoot: string, options: any): Promise
  * Handles the "watch" command flow.
  */
 async function handleWatchCommand(projectRoot: string, options: any): Promise<void> {
+  const version = await getPackageVersion(projectRoot);
+  const framework = await detectProjectType(projectRoot);
+
+  const disableAnimations = options.animations === false ||
+    process.env.NO_COLOR !== undefined ||
+    process.env.TERM === 'dumb' ||
+    process.env.CI !== undefined;
+  logger.setAnimationsEnabled(!disableAnimations);
+
   try {
     const fileConfig = await loadConfig(projectRoot);
     const config = mergeConfig(fileConfig, options);
@@ -247,14 +392,41 @@ async function handleWatchCommand(projectRoot: string, options: any): Promise<vo
     console.log(`  Target Quality: ${chalk.white(config.quality.toString())}`);
     console.log(`  Press ${chalk.bold('Ctrl+C')} to exit.\n`);
 
+    let watchOptimizedCount = 0;
+    let watchSavedBytes = 0;
+    
+    // Periodically show watch summaries every 30 seconds
+    const interval = setInterval(() => {
+      if (watchOptimizedCount > 0) {
+        console.log(`\n  ${chalk.cyan('i')} ${chalk.bold('Watch Summary (Last 30s):')} Optimized ${chalk.green(watchOptimizedCount)} files, saved ${chalk.green(formatSize(watchSavedBytes))}.`);
+        watchOptimizedCount = 0;
+        watchSavedBytes = 0;
+      }
+    }, 30000);
+
+    // Bind cleanup
+    process.on('SIGINT', () => {
+      clearInterval(interval);
+      process.exit(0);
+    });
+
     startWatcher(projectRoot, config, async (result) => {
-      logger.logFileOptimization(result);
+      logger.logWatchOptimization(result);
+
+      if (result.success && !result.skipped) {
+        watchOptimizedCount++;
+        let saved = result.originalSize;
+        result.optimizedFiles.forEach(opt => {
+          saved -= opt.size;
+        });
+        watchSavedBytes += Math.max(0, saved);
+      }
 
       // Re-run report compilation in background on change
       try {
         const finalScan = await scanDirectories(projectRoot, config);
-        const audit = await runDoctorAudit(finalScan);
-        await exportReportJson(projectRoot, [result], audit.healthScore, audit.recommendations);
+        const audit = await runDoctorAudit(finalScan, config);
+        await exportReportJson(projectRoot, [result], config, audit.healthScore, audit.recommendations);
 
         const previousCache = await readCache(projectRoot);
         const newHashes = previousCache ? { ...previousCache.hashes } : {};
@@ -282,59 +454,65 @@ async function handleWatchCommand(projectRoot: string, options: any): Promise<vo
 /**
  * Handles the "doctor" command flow.
  */
-async function handleDoctorCommand(projectRoot: string): Promise<void> {
+async function handleDoctorCommand(projectRoot: string, options: any): Promise<void> {
+  const version = await getPackageVersion(projectRoot);
+  const framework = await detectProjectType(projectRoot);
+
+  const disableAnimations = options.animations === false ||
+    process.env.NO_COLOR !== undefined ||
+    process.env.TERM === 'dumb' ||
+    process.env.CI !== undefined;
+  logger.setAnimationsEnabled(!disableAnimations);
+
   try {
+    await playStartupSequence(version, framework, 'Doctor Audit');
+
     logger.startSpinner('Analyzing project image health...');
     const config = await loadConfig(projectRoot);
     const files = await scanDirectories(projectRoot, config);
-    const audit = await runDoctorAudit(files);
+    const audit = await runDoctorAudit(files, config);
     const previousCache = await readCache(projectRoot);
     logger.stopSpinner(true, 'Audit check finished');
 
     console.log(`\n  ${chalk.cyan.bold('Project Image Audit')}`);
     console.log(`  ────────────────────────────────────────────────────────\n`);
 
-    // Render Health Score and comparison
-    const scoreColor = audit.healthScore >= 90
-      ? chalk.green
-      : audit.healthScore >= 70
-        ? chalk.yellow
-        : chalk.red;
+    // 1. Project Card
+    logger.printProjectCard(
+      version,
+      framework,
+      audit.totalImages,
+      'Doctor Audit',
+      audit.generatedAssets,
+      audit.totalFilesDetected
+    );
 
-    console.log(`  ${chalk.bold('Project Health Score:')}    ${scoreColor.bold(audit.healthScore)} / 100`);
+    // 2. Graded Health Score gauge
+    logger.printPremiumHealthScore(audit.healthScore);
 
     if (previousCache) {
       const delta = compareCache(audit.healthScore, audit.totalSize, audit.totalImages, previousCache);
       if (delta.scoreImprovement !== null) {
         const sign = delta.scoreImprovement >= 0 ? '+' : '';
         const impColor = delta.scoreImprovement >= 0 ? chalk.green : chalk.red;
-        console.log(`  ${chalk.gray(`(Previous Score: ${delta.previousScore} | Improvement: ${impColor(sign + delta.scoreImprovement)})`)}`);
+        console.log(`  ${chalk.gray(`(Previous Score: ${delta.previousScore} | Improvement: ${impColor(sign + delta.scoreImprovement)})`)}\n`);
       }
     }
 
-    console.log(`  ${chalk.bold('Potential Savings:')}       ${chalk.green.bold(formatSize(audit.potentialSavingsBytes))}`);
-    console.log(`  ${chalk.bold('Scanned Images:')}          ${chalk.white(audit.totalImages.toString())}`);
-    console.log(`  ${chalk.bold('Total File Size:')}         ${chalk.white(formatSize(audit.totalSize))}`);
+    console.log(`  ${chalk.gray('Total File Size:')}         ${chalk.white(formatSize(audit.totalSize))}`);
+    console.log(`  ${chalk.gray('Potential Savings:')}       ${chalk.green.bold(formatSize(audit.potentialSavingsBytes))}\n`);
 
-    // Render Largest Assets section
-    console.log(`\n  ${chalk.cyan.bold('Largest Assets:')}`);
-    if (audit.largestAssets.length === 0) {
-      console.log(`    ${chalk.gray('No source PNG, JPG, or JPEG files found.')}`);
-    } else {
-      audit.largestAssets.forEach((asset, idx) => {
-        console.log(`    ${idx + 1}. ${chalk.white(asset.path)} — ${chalk.yellow(formatSize(asset.size))}`);
-      });
-    }
+    // 3. Top 5 Largest Assets visual bars
+    logger.printLargestAssetsVisual(audit.largestAssets);
 
-    // Render recommendations
-    console.log(`\n  ${chalk.cyan.bold('Recommendations:')}`);
-    if (audit.recommendations.length === 0 && audit.healthScore === 100) {
-      console.log(`    ${chalk.green('✓')} All images fully optimized! Keep up the good work.`);
-    } else {
-      audit.recommendations.forEach((rec) => {
-        console.log(`    ${chalk.yellow('•')} ${rec}`);
-      });
-    }
+    // 4. Top 5 Savings Opportunities visual bars
+    logger.printSavingsOpportunitiesVisual(audit.savingsOpportunities);
+
+    // 5. Folder performance breakdown table
+    logger.printFolderBreakdownTable(audit.folderBreakdown);
+
+    // 6. Smart ranked recommendations
+    logger.printRankedRecommendations(audit.recommendations, audit);
 
     console.log('');
   } catch (error: any) {
@@ -346,37 +524,63 @@ async function handleDoctorCommand(projectRoot: string): Promise<void> {
 /**
  * Handles the "report" command flow.
  */
-async function handleReportCommand(projectRoot: string): Promise<void> {
+async function handleReportCommand(projectRoot: string, options: any): Promise<void> {
   const reportPath = path.join(projectRoot, 'assetflow-report.json');
+  const version = await getPackageVersion(projectRoot);
+  const framework = await detectProjectType(projectRoot);
+
+  const disableAnimations = options.animations === false ||
+    process.env.NO_COLOR !== undefined ||
+    process.env.TERM === 'dumb' ||
+    process.env.CI !== undefined;
+  logger.setAnimationsEnabled(!disableAnimations);
 
   try {
     const rawReport = await fs.readFile(reportPath, 'utf8');
     const reportData = JSON.parse(rawReport);
+
+    if (options.json) {
+      console.log(rawReport);
+      return;
+    }
+
     const previousCache = await readCache(projectRoot);
 
     console.log(`\n  ${chalk.cyan.bold('Last Optimization Report')}`);
     console.log(`  Generated at: ${chalk.gray(new Date(reportData.timestamp).toLocaleString())}`);
     console.log(`  ────────────────────────────────────────────────────────\n`);
 
-    console.log(`  ${chalk.bold('Total Scanned Images:')}   ${chalk.white(reportData.summary.totalOriginalImages)}`);
-    console.log(`  ${chalk.bold('Original Total Size:')}    ${chalk.white(formatSize(reportData.summary.totalOriginalSize))}`);
-    console.log(`  ${chalk.bold('Optimized Total Size:')}   ${chalk.white(formatSize(reportData.summary.totalOptimizedSize))}`);
-    console.log(`  ${chalk.bold('Space Saved:')}            ${chalk.green.bold(formatSize(reportData.summary.spaceSaved))}`);
-    console.log(`  ${chalk.bold('Reduction Ratio:')}        ${chalk.green.bold(reportData.summary.averageReduction + '%')}`);
-    
+    // Standardize counts
+    const sourceImagesCount = reportData.summary.sourceImages ?? reportData.summary.totalOriginalImages ?? 0;
+    const generatedAssetsCount = reportData.summary.generatedAssets ?? 0;
+    const totalFilesCount = reportData.summary.totalFilesDetected ?? (sourceImagesCount + generatedAssetsCount);
+
+    // Overview Card representation
+    logger.printProjectCard(
+      version,
+      framework,
+      sourceImagesCount,
+      'Report Review',
+      generatedAssetsCount,
+      totalFilesCount
+    );
+
+    // Health Score visual bar
     if (reportData.healthScore !== null) {
-      console.log(`  ${chalk.bold('Project Health Score:')}   ${chalk.cyan(reportData.healthScore)} / 100`);
+      logger.printPremiumHealthScore(reportData.healthScore);
     }
 
     if (previousCache) {
+      const prevScore = previousCache.healthScore !== undefined ? previousCache.healthScore : 100;
+      const currentScore = reportData.healthScore !== undefined && reportData.healthScore !== null ? reportData.healthScore : 100;
       const delta = compareCache(
-        reportData.healthScore || 100,
+        currentScore,
         reportData.summary.totalOptimizedSize,
-        reportData.summary.totalOriginalImages,
+        sourceImagesCount,
         previousCache
       );
       
-      console.log(`\n  ${chalk.cyan.bold('Historical Progress Delta:')}`);
+      console.log(`  ${chalk.cyan.bold('Historical Progress Delta:')}`);
       if (delta.scoreImprovement !== null) {
         const sign = delta.scoreImprovement >= 0 ? '+' : '';
         console.log(`    • Score Improvement:  ${chalk.bold(sign + delta.scoreImprovement)} points`);
@@ -388,7 +592,63 @@ async function handleReportCommand(projectRoot: string): Promise<void> {
         const sign = delta.imageCountDelta > 0 ? '+' : '';
         console.log(`    • Scanned Files Delta: ${chalk.white(sign + delta.imageCountDelta)} images`);
       }
+      console.log('');
     }
+
+    // Impact charts
+    logger.printSizeComparison(reportData.summary.totalOriginalSize, reportData.summary.totalOptimizedSize);
+
+    // 1. Largest Saving Asset detail
+    let largestSavingFile: any = null;
+    let maxSavings = -1;
+    if (reportData.files && reportData.files.length > 0) {
+      for (const file of reportData.files) {
+        const savings = file.originalSize - file.optimizedSize;
+        if (savings > maxSavings && file.success) {
+          maxSavings = savings;
+          largestSavingFile = file;
+        }
+      }
+    }
+
+    console.log(`  ${chalk.bold('Largest Saving Asset:')}`);
+    if (largestSavingFile && maxSavings > 0) {
+      console.log(`    ${chalk.white(largestSavingFile.filePath)}`);
+      console.log(`    ${chalk.gray(formatSize(largestSavingFile.originalSize))} → ${chalk.white(formatSize(largestSavingFile.optimizedSize))}`);
+      console.log(`    Saved: ${chalk.green.bold(formatSize(maxSavings))}\n`);
+    } else {
+      console.log(`    ${chalk.gray('No savings detected.')}\n`);
+    }
+
+    // 2. Average savings
+    const filesWithSavings = reportData.files ? reportData.files.filter((f: any) => f.success && f.originalSize > f.optimizedSize).length : 0;
+    const avgSavings = filesWithSavings > 0 ? reportData.summary.spaceSaved / filesWithSavings : 0;
+    console.log(`  ${chalk.bold('Average Savings Per File:')}  ${chalk.green.bold(formatSize(avgSavings))}\n`);
+
+    // 3. Folder-Level breakdown
+    const folderBreakdownMap = new Map<string, { count: number; original: number; optimized: number }>();
+    if (reportData.files) {
+      for (const file of reportData.files) {
+        const relativeFolder = path.dirname(file.filePath).replace(/\\/g, '/');
+        const folderKey = relativeFolder === '.' ? 'root' : relativeFolder;
+        
+        const existing = folderBreakdownMap.get(folderKey) || { count: 0, original: 0, optimized: 0 };
+        folderBreakdownMap.set(folderKey, {
+          count: existing.count + 1,
+          original: existing.original + file.originalSize,
+          optimized: existing.optimized + file.optimizedSize,
+        });
+      }
+    }
+
+    const folderSavingsList = Array.from(folderBreakdownMap.entries()).map(([folder, info]) => ({
+      folder,
+      count: info.count,
+      original: info.original,
+      optimized: info.optimized,
+    })).sort((a, b) => (b.original - b.optimized) - (a.original - a.optimized));
+
+    logger.printFolderSavingsTable(folderSavingsList);
 
     console.log('');
   } catch (error: any) {

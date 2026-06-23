@@ -30,30 +30,30 @@ export async function setupTestWorkspace(suiteName: string): Promise<string> {
     await fs.mkdir(dir, { recursive: true });
   }
 
-  // Create mock PNG image (100x100px red canvas)
+  // Create mock PNG image (300x300px red canvas, uncompressed to make it large but under 500KB)
   const pngPath = path.join(root, 'public', 'images', 'hero.png');
   await sharp({
     create: {
-      width: 100,
-      height: 100,
+      width: 300,
+      height: 300,
       channels: 4,
       background: { r: 255, g: 0, b: 0, alpha: 1 },
     },
   })
-    .png()
+    .png({ compressionLevel: 0 })
     .toFile(pngPath);
 
-  // Create mock JPG image (50x50px blue canvas)
+  // Create mock JPG image (200x200px blue canvas, max quality)
   const jpgPath = path.join(root, 'src', 'avatar.jpg');
   await sharp({
     create: {
-      width: 50,
-      height: 50,
+      width: 200,
+      height: 200,
       channels: 3,
       background: { r: 0, g: 0, b: 255 },
     },
   })
-    .jpeg()
+    .jpeg({ quality: 100 })
     .toFile(jpgPath);
 
   // Create ignored PNG inside node_modules to verify scanner ignores it
