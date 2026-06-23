@@ -9,43 +9,43 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Discovery Engine
 
-- [ ] **DISC-01**: Automatically recursively scan directories (defaulting to `src/`, `public/`, `assets/`, `images/`).
-- [ ] **DISC-02**: Support scanning and processing PNG, JPG, JPEG formats, with extension-mapping configurations.
-- [ ] **DISC-03**: Ignore default patterns (`node_modules`, `.next`, `dist`, `build`, `coverage`, `.git`) and support custom ignore glob/paths.
+- [x] **DISC-01**: Automatically recursively scan directories (defaulting to `src/`, `public/`, `assets/`, `images/`).
+- [x] **DISC-02**: Support scanning and processing PNG, JPG, JPEG formats, with extension-mapping configurations.
+- [x] **DISC-03**: Ignore default patterns (`node_modules`, `.next`, `dist`, `build`, `coverage`, `.git`) and support custom ignore glob/paths.
 
 ### Optimization Engine
 
-- [ ] **OPT-01**: Compress and convert PNG/JPG/JPEG images to WebP format using Sharp.
-- [ ] **OPT-02**: Compress and convert PNG/JPG/JPEG images to AVIF format using Sharp.
-- [ ] **OPT-03**: Support output format config options `webp`, `avif`, and `both` (generating both files).
-- [ ] **OPT-04**: Generate responsive image variants with aspect ratio preserved when `"responsive": true` and `"sizes"` array (e.g. `[640, 1280]`) are configured.
-- [ ] **OPT-05**: Automatically strip metadata (EXIF, GPS, camera data) from optimized files by default, unless `keepMetadata: true` is configured.
-- [ ] **OPT-06**: Implement adaptive compression that matches quality to dimensions, size, and compression potential without visible degradation.
-- [ ] **OPT-07**: Preserve exact directory structures for files in the output (e.g. `public/images/hero.png` -> `public/images/hero.webp`).
-- [ ] **OPT-08**: Support optimization presets ("balanced", "quality", "compression") and customizable quality values (default: 80).
+- [x] **OPT-01**: Compress and convert PNG/JPG/JPEG images to WebP format using Sharp.
+- [x] **OPT-02**: Compress and convert PNG/JPG/JPEG images to AVIF format using Sharp.
+- [x] **OPT-03**: Support output format config options `webp`, `avif`, and `both` (generating both files).
+- [x] **OPT-04**: Generate responsive image variants with aspect ratio preserved when `"responsive": true` and `"sizes"` array (e.g. `[640, 1280]`) are configured.
+- [x] **OPT-05**: Automatically strip metadata (EXIF, GPS, camera data) from optimized files by default, unless `keepMetadata: true` is configured.
+- [x] **OPT-06**: Implement adaptive compression that matches quality to dimensions, size, and compression potential without visible degradation.
+- [x] **OPT-07**: Preserve exact directory structures for files in the output (e.g. `public/images/hero.png` -> `public/images/hero.webp`).
+- [x] **OPT-08**: Support optimization presets ("balanced", "quality", "compression") and customizable quality values (default: 80).
 
 ### Processing & Workflow Modes
 
-- [ ] **MODE-01**: Implement Dry-Run mode (`--dry-run`) to estimate savings and report results without making actual changes to files.
-- [ ] **MODE-02**: Implement Watch mode (`watch` command) using Chokidar to detect and optimize new/changed assets in real-time.
-- [ ] **MODE-03**: Implement Changed Files mode (`--changed` flag) using git diff to target only modified and untracked images.
-- [ ] **MODE-04**: Implement robust, non-crashing error handling (log warning/errors and skip bad/corrupted files, continuing to process other images).
+- [x] **MODE-01**: Implement Dry-Run mode (`--dry-run`) to estimate savings and report results without making actual changes to files.
+- [x] **MODE-02**: Implement Watch mode (`watch` command) using Chokidar to detect and optimize new/changed assets in real-time.
+- [x] **MODE-03**: Implement Changed Files mode (`--changed` flag) using git diff to target only modified and untracked images.
+- [x] **MODE-04**: Implement robust, non-crashing error handling (log warning/errors and skip bad/corrupted files, continuing to process other images).
 
 ### Reporting & Auditing
 
-- [ ] **REP-01**: Render polished CLI output with Ora spinners, Chalk colors, and Vercel-like terminal summary cards.
-- [ ] **REP-02**: Implement Doctor command (`doctor`) to calculate a deterministic project health score (base 100 with specified deductions: -5 for >1MB, -2 for PNG >500KB, -3 for containing metadata, -5 for lacking optimized alternatives).
-- [ ] **REP-03**: Implement Largest Asset bottleneck detection and Potential Savings estimation within the doctor audit command.
-- [ ] **REP-04**: Export detailed optimization reports to `assetflow-report.json` containing per-file stats, reduction ratios, errors, and recommendations.
-- [ ] **REP-05**: Implement Project Fingerprint caching in `.assetflow/cache.json` tracking total images, size, health score, and date, allowing doctor/report command to display score improvements.
-- [ ] **REP-06**: Implement Report command (`report`) to read last optimization report, total optimized assets, current size, and historical health comparison from the cache.
+- [x] **REP-01**: Render polished CLI output with Ora spinners, Chalk colors, and Vercel-like terminal summary cards.
+- [x] **REP-02**: Implement Doctor command (`doctor`) to calculate a deterministic project health score (base 100 with specified deductions: -5 for >1MB, -2 for PNG >500KB, -3 for containing metadata, -5 for lacking optimized alternatives).
+- [x] **REP-03**: Implement Largest Asset bottleneck detection and Potential Savings estimation within the doctor audit command.
+- [x] **REP-04**: Export detailed optimization reports to `assetflow-report.json` containing per-file stats, reduction ratios, errors, and recommendations.
+- [x] **REP-05**: Implement Project Fingerprint caching in `.assetflow/cache.json` tracking total images, size, health score, and date, allowing doctor/report command to display score improvements.
+- [x] **REP-06**: Implement Report command (`report`) to read last optimization report, total optimized assets, current size, and historical health comparison from the cache.
 
 ### Configuration & Infrastructure
 
-- [ ] **CONF-01**: Parse and validate `assetflow.config.json` using Zod schemas with fallback defaults, validating the `responsive` and `sizes` settings.
-- [ ] **CONF-02**: Set up TypeScript strict build pipeline with fully typed modules (no `any`) and rich metadata configuration in `package.json`.
-- [ ] **CONF-03**: Achieve 95%+ test coverage using Vitest for Unit, Integration, and E2E tests.
-- [ ] **CONF-04**: Setup GitHub Actions for CI/CD lint/test/build validation and release workflows.
+- [x] **CONF-01**: Parse and validate `assetflow.config.json` using Zod schemas with fallback defaults, validating the `responsive` and `sizes` settings.
+- [x] **CONF-02**: Set up TypeScript strict build pipeline with fully typed modules (no `any`) and rich metadata configuration in `package.json`.
+- [x] **CONF-03**: Achieve 95%+ test coverage using Vitest for Unit, Integration, and E2E tests.
+- [x] **CONF-04**: Setup GitHub Actions for CI/CD lint/test/build validation and release workflows.
 
 ## v2 Requirements
 
@@ -73,31 +73,31 @@ Explicitly excluded. Documented to prevent scope creep.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DISC-01 | Phase 1 | Pending |
-| DISC-02 | Phase 1 | Pending |
-| DISC-03 | Phase 1 | Pending |
-| OPT-01 | Phase 2 | Pending |
-| OPT-02 | Phase 2 | Pending |
-| OPT-03 | Phase 2 | Pending |
-| OPT-04 | Phase 2 | Pending |
-| OPT-05 | Phase 2 | Pending |
-| OPT-06 | Phase 2 | Pending |
-| OPT-07 | Phase 2 | Pending |
-| OPT-08 | Phase 2 | Pending |
-| MODE-01 | Phase 3 | Pending |
-| MODE-02 | Phase 3 | Pending |
-| MODE-03 | Phase 3 | Pending |
-| MODE-04 | Phase 3 | Pending |
-| REP-01 | Phase 4 | Pending |
-| REP-02 | Phase 4 | Pending |
-| REP-03 | Phase 4 | Pending |
-| REP-04 | Phase 4 | Pending |
-| REP-05 | Phase 4 | Pending |
-| REP-06 | Phase 4 | Pending |
-| CONF-01 | Phase 1 | Pending |
-| CONF-02 | Phase 1 | Pending |
-| CONF-03 | Phase 5 | Pending |
-| CONF-04 | Phase 5 | Pending |
+| DISC-01 | Phase 1 | Complete |
+| DISC-02 | Phase 1 | Complete |
+| DISC-03 | Phase 1 | Complete |
+| OPT-01 | Phase 2 | Complete |
+| OPT-02 | Phase 2 | Complete |
+| OPT-03 | Phase 2 | Complete |
+| OPT-04 | Phase 2 | Complete |
+| OPT-05 | Phase 2 | Complete |
+| OPT-06 | Phase 2 | Complete |
+| OPT-07 | Phase 2 | Complete |
+| OPT-08 | Phase 2 | Complete |
+| MODE-01 | Phase 3 | Complete |
+| MODE-02 | Phase 3 | Complete |
+| MODE-03 | Phase 3 | Complete |
+| MODE-04 | Phase 3 | Complete |
+| REP-01 | Phase 4 | Complete |
+| REP-02 | Phase 4 | Complete |
+| REP-03 | Phase 4 | Complete |
+| REP-04 | Phase 4 | Complete |
+| REP-05 | Phase 4 | Complete |
+| REP-06 | Phase 4 | Complete |
+| CONF-01 | Phase 1 | Complete |
+| CONF-02 | Phase 1 | Complete |
+| CONF-03 | Phase 5 | Complete |
+| CONF-04 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 25 total
@@ -106,4 +106,4 @@ Explicitly excluded. Documented to prevent scope creep.
 
 ---
 *Requirements defined: 2026-06-23*
-*Last updated: 2026-06-23 after architecture refinements*
+*Last updated: 2026-06-23 after full implementation*
