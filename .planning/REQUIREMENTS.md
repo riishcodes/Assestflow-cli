@@ -15,12 +15,14 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Optimization Engine
 
-- [ ] **OPT-01**: Compress and convert PNG images to WebP/AVIF formats using Sharp.
-- [ ] **OPT-02**: Compress and convert JPG/JPEG images to WebP/AVIF formats using Sharp.
-- [ ] **OPT-03**: Automatically strip metadata (EXIF, GPS, camera data) from optimized files by default.
-- [ ] **OPT-04**: Implement adaptive compression that matches quality to dimensions, size, and compression potential without visible degradation.
-- [ ] **OPT-05**: Preserve exact directory structures for files in the output (e.g. `public/images/hero.png` -> `public/images/hero.webp`).
-- [ ] **OPT-06**: Support optimization presets ("balanced", "quality", "compression") and customizable quality values (default: 80).
+- [ ] **OPT-01**: Compress and convert PNG/JPG/JPEG images to WebP format using Sharp.
+- [ ] **OPT-02**: Compress and convert PNG/JPG/JPEG images to AVIF format using Sharp.
+- [ ] **OPT-03**: Support output format config options `webp`, `avif`, and `both` (generating both files).
+- [ ] **OPT-04**: Generate responsive image variants with aspect ratio preserved when `"responsive": true` and `"sizes"` array (e.g. `[640, 1280]`) are configured.
+- [ ] **OPT-05**: Automatically strip metadata (EXIF, GPS, camera data) from optimized files by default, unless `keepMetadata: true` is configured.
+- [ ] **OPT-06**: Implement adaptive compression that matches quality to dimensions, size, and compression potential without visible degradation.
+- [ ] **OPT-07**: Preserve exact directory structures for files in the output (e.g. `public/images/hero.png` -> `public/images/hero.webp`).
+- [ ] **OPT-08**: Support optimization presets ("balanced", "quality", "compression") and customizable quality values (default: 80).
 
 ### Processing & Workflow Modes
 
@@ -32,13 +34,16 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Reporting & Auditing
 
 - [ ] **REP-01**: Render polished CLI output with Ora spinners, Chalk colors, and Vercel-like terminal summary cards.
-- [ ] **REP-02**: Implement Doctor command (`doctor`) to analyze project image health, compute a score (e.g., 92/100), and list actionable optimization recommendations.
-- [ ] **REP-03**: Export detailed optimization reports to `assetflow-report.json` containing per-file stats, reduction ratios, errors, and recommendations.
+- [ ] **REP-02**: Implement Doctor command (`doctor`) to calculate a deterministic project health score (base 100 with specified deductions: -5 for >1MB, -2 for PNG >500KB, -3 for containing metadata, -5 for lacking optimized alternatives).
+- [ ] **REP-03**: Implement Largest Asset bottleneck detection and Potential Savings estimation within the doctor audit command.
+- [ ] **REP-04**: Export detailed optimization reports to `assetflow-report.json` containing per-file stats, reduction ratios, errors, and recommendations.
+- [ ] **REP-05**: Implement Project Fingerprint caching in `.assetflow/cache.json` tracking total images, size, health score, and date, allowing doctor/report command to display score improvements.
+- [ ] **REP-06**: Implement Report command (`report`) to read last optimization report, total optimized assets, current size, and historical health comparison from the cache.
 
 ### Configuration & Infrastructure
 
-- [ ] **CONF-01**: Parse and validate `assetflow.config.json` using Zod schemas with fallback defaults.
-- [ ] **CONF-02**: Set up TypeScript strict build pipeline with fully typed modules (no `any`).
+- [ ] **CONF-01**: Parse and validate `assetflow.config.json` using Zod schemas with fallback defaults, validating the `responsive` and `sizes` settings.
+- [ ] **CONF-02**: Set up TypeScript strict build pipeline with fully typed modules (no `any`) and rich metadata configuration in `package.json`.
 - [ ] **CONF-03**: Achieve 95%+ test coverage using Vitest for Unit, Integration, and E2E tests.
 - [ ] **CONF-04**: Setup GitHub Actions for CI/CD lint/test/build validation and release workflows.
 
@@ -50,6 +55,9 @@ Deferred to future release. Tracked but not in current roadmap.
 
 - **FMT-01**: Built-in support for vector SVG optimizations (e.g., SVGO integration).
 - **FMT-02**: Integrations for Next.js, Vite, and GitHub Actions as first-class plugins (`assetflow-next`, `assetflow-vite`, `assetflow-action`).
+- **ENT-01**: Advanced AI compression models.
+- **ENT-02**: Cloud synchronization and dashboard UI integration.
+- **ENT-03**: Custom JSON export formats and enterprise reporting.
 
 ## Out of Scope
 
@@ -74,6 +82,8 @@ Explicitly excluded. Documented to prevent scope creep.
 | OPT-04 | Phase 2 | Pending |
 | OPT-05 | Phase 2 | Pending |
 | OPT-06 | Phase 2 | Pending |
+| OPT-07 | Phase 2 | Pending |
+| OPT-08 | Phase 2 | Pending |
 | MODE-01 | Phase 3 | Pending |
 | MODE-02 | Phase 3 | Pending |
 | MODE-03 | Phase 3 | Pending |
@@ -81,16 +91,19 @@ Explicitly excluded. Documented to prevent scope creep.
 | REP-01 | Phase 4 | Pending |
 | REP-02 | Phase 4 | Pending |
 | REP-03 | Phase 4 | Pending |
+| REP-04 | Phase 4 | Pending |
+| REP-05 | Phase 4 | Pending |
+| REP-06 | Phase 4 | Pending |
 | CONF-01 | Phase 1 | Pending |
 | CONF-02 | Phase 1 | Pending |
 | CONF-03 | Phase 5 | Pending |
 | CONF-04 | Phase 5 | Pending |
 
 **Coverage:**
-- v1 requirements: 20 total
-- Mapped to phases: 20
+- v1 requirements: 25 total
+- Mapped to phases: 25
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-06-23*
-*Last updated: 2026-06-23 after initial definition*
+*Last updated: 2026-06-23 after architecture refinements*
