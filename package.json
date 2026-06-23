@@ -4,7 +4,7 @@
   "description": "Install once. Never think about image optimization again.",
   "main": "dist/index.js",
   "bin": {
-    "assetflow": "./dist/index.js"
+    "assetflow": "dist/index.js"
   },
   "files": [
     "dist",
