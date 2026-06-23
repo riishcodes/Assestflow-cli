@@ -17,14 +17,17 @@ Install once. Never think about image optimization again.
 ### Active
 
 - [ ] Implement image discovery engine (scanning recursive directories `src/`, `public/`, `assets/`, `images/` for png, jpg, jpeg; ignoring node_modules, .next, dist, etc.)
-- [ ] Implement optimization engine (PNG/JPG/JPEG to WebP/AVIF using Sharp with presets and custom quality)
+- [ ] Implement optimization engine (PNG/JPG/JPEG to WebP/AVIF or both using Sharp with presets and custom quality)
+- [ ] Implement responsive variants generation (creating widths specified with aspect ratio preserved)
 - [ ] Implement adaptive compression engine (analyzing dimensions, size, compression potential for zero visible degradation)
-- [ ] Implement EXIF/GPS metadata stripping (default enabled for privacy and size reduction)
+- [ ] Implement EXIF/GPS metadata stripping (default enabled for privacy and size reduction; keepMetadata option)
 - [ ] Implement folder structure preservation (e.g., `public/images/hero.png` -> `public/images/hero.webp`)
 - [ ] Implement Dry Run mode (`--dry-run` to scan, estimate savings, and report without modification)
 - [ ] Implement Watch mode (`watch` command to watch directories, auto-optimize, and report in real-time)
 - [ ] Implement Changed Files mode (`--changed` flag to optimize only modified assets using git diff)
-- [ ] Implement Doctor command (`doctor` command to audit image health, output health score, and suggest actions)
+- [ ] Implement Project Fingerprint cache (`.assetflow/cache.json`) to track project size and health score progress
+- [ ] Implement Doctor command (`doctor` command to audit image health with deterministic scoring, show largest bottleneck assets, potential savings, and previous run comparison)
+- [ ] Implement Report command (`report` command to read cache/history and print comparisons)
 - [ ] Implement Reporting system (colored terminal output, summary cards, and `assetflow-report.json` export)
 - [ ] Implement Zod-based config system (`assetflow.config.json` support)
 - [ ] Implement robust error handling (unsupported formats, corrupt images, permission issues without crashing)
@@ -34,9 +37,11 @@ Install once. Never think about image optimization again.
 
 ### Out of Scope
 
-- [ ] Cloud-based image optimization (this is a local-first, privacy-first CLI)
-- [ ] Direct edit of SVG vectors (only raster optimizations and metadata stripping if applicable, though SVG is future-ready support)
-- [ ] UI Dashboard or Desktop App (GSD workbench is out of scope; focus is entirely on terminal CLI experience)
+- [ ] Advanced AI compression models (deferred past v1)
+- [ ] Custom JSON export formats (deferred past v1)
+- [ ] Enterprise reporting (deferred past v1)
+- [ ] Cloud synchronization (deferred past v1)
+- [ ] Dashboard UI / Desktop App (deferred past v1)
 
 ## Context
 
@@ -60,6 +65,7 @@ Install once. Never think about image optimization again.
 | Fast-Glob for file discovery | Fast recursive file listing with ignore support | — Pending |
 | Chokidar for watching | Robust cross-platform file watcher for Node.js | — Pending |
 | Vitest for testing | Fast, modern test runner with native TS support | — Pending |
+| Caching in `.assetflow/` | Simplest file-based deterministic caching without database overhead | — Pending |
 
 ## Evolution
 
@@ -79,4 +85,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-23 after initialization*
+*Last updated: 2026-06-23 after architecture refinements*
