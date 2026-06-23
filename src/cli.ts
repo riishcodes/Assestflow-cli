@@ -97,6 +97,16 @@ export async function runCli(argv: string[], projectRoot: string): Promise<void>
     .description('Install once. Never think about image optimization again.')
     .version(version);
 
+  program.addHelpText('before', () => {
+    const hasNoAnims = argv.includes('--no-animations') ||
+      process.env.NO_COLOR !== undefined ||
+      process.env.TERM === 'dumb' ||
+      process.env.CI !== undefined;
+    logger.setAnimationsEnabled(!hasNoAnims);
+    logger.renderBrandingHeader();
+    return '';
+  });
+
   // Global command configuration options
   program
     .option('-d, --dry-run', 'Scan and estimate savings without modifying files')
@@ -162,6 +172,7 @@ export async function runCli(argv: string[], projectRoot: string): Promise<void>
  * Handles the "init" command flow.
  */
 async function handleInitCommand(projectRoot: string): Promise<void> {
+  logger.renderBrandingHeader();
   const configPath = path.join(projectRoot, 'assetflow.config.json');
   try {
     await fs.access(configPath);
@@ -196,7 +207,7 @@ async function handleOptimizeCommand(projectRoot: string, options: any): Promise
   logger.setAnimationsEnabled(!disableAnimations);
   
   try {
-    logger.printBrandedHeader(version, framework);
+    logger.renderCompactHeader(version);
 
     const fileConfig = await loadConfig(projectRoot);
     const config = mergeConfig(fileConfig, options);
@@ -357,7 +368,7 @@ async function handleWatchCommand(projectRoot: string, options: any): Promise<vo
     const fileConfig = await loadConfig(projectRoot);
     const config = mergeConfig(fileConfig, options);
 
-    console.log(`\n  ${chalk.cyan.bold('AssetFlow Watcher')}`);
+    logger.renderCompactHeader(version);
     console.log(`  Watching: ${chalk.gray(config.directories?.join(', ') || 'src, public, assets, images')}`);
     console.log(`  Output Formats: ${chalk.white(config.format.toUpperCase())}`);
     console.log(`  Target Quality: ${chalk.white(config.quality.toString())}`);
@@ -436,7 +447,7 @@ async function handleDoctorCommand(projectRoot: string, options: any): Promise<v
   logger.setAnimationsEnabled(!disableAnimations);
 
   try {
-    logger.printBrandedHeader(version, framework);
+    logger.renderBrandingHeader();
 
     const config = await loadConfig(projectRoot);
     const files = await scanDirectories(projectRoot, config);
@@ -523,7 +534,8 @@ async function handleReportCommand(projectRoot: string, options: any): Promise<v
 
     const previousCache = await readCache(projectRoot);
 
-    console.log(`\n  ${chalk.cyan.bold('Last Optimization Report')}`);
+    logger.renderCompactHeader(version);
+    console.log(`  Last Optimization Report`);
     console.log(`  Generated at: ${chalk.gray(new Date(reportData.timestamp).toLocaleString())}`);
     console.log(`  ────────────────────────────────────────────────────────\n`);
 

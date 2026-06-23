@@ -69,14 +69,42 @@ export function updateSpinner(text: string): void {
 }
 
 /**
- * Premium Minimal Branding Header
+ * Renders the large responsive branding header with option 1 ASCII art.
  */
-export function printBrandedHeader(version: string, framework: string): void {
-  const brand = colorizeGradient(`AssetFlow v${version}`);
-  console.log(`\n  ${brand}`);
-  console.log(`  ${chalk.gray('Image Performance CLI')}`);
-  console.log(`  ${chalk.gray(`${framework} Project Detected`)}`);
-  console.log(`  ${chalk.gray('────────────────────────────────────')}\n`);
+export function renderBrandingHeader(): void {
+  const cols = process.stdout.columns || 101;
+  let logo = '';
+  if (cols > 100) {
+    logo = `█████╗ ███████╗███████╗███████╗████████╗███████╗██╗     ███████╗██╗      ██████╗ ██╗    ██╗
+██╔══██╗██╔════╝██╔════╝██╔════╝╚══██╔══╝██╔════╝██║     ██╔════╝██║     ██╔═══██╗██║    ██║
+███████║███████╗███████╗█████╗     ██║   █████╗  ██║     █████╗  ██║     ██║   ██║██║ █╗ ██║
+██╔══██║╚════██║╚════██║██╔══╝     ██║   ██╔══╝  ██║     ██╔══╝  ██║     ██║   ██║██║███╗██║
+██║  ██║███████║███████║███████╗   ██║   ██║     ███████╗██║     ███████╗╚██████╔╝╚███╔███╔╝
+╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝   ╚═╝   ╚═╝     ╚══════╝╚═╝     ╚══════╝ ╚═════╝  ╚══╝╚══╝`;
+  } else {
+    logo = 'AssetFlow';
+  }
+
+  const grad = gradient(['#38BDF8', '#60A5FA', '#FFFFFF']);
+  const colorizedLogo = animationsEnabled ? grad.multiline(logo) : logo;
+
+  console.log(colorizedLogo);
+  console.log('');
+  console.log(chalk.white('Image Performance CLI'));
+  console.log('');
+  console.log(chalk.gray('Install once. Never think about image optimization again.'));
+  console.log('');
+  console.log(chalk.gray('────────────────────────────────────────────'));
+  console.log('');
+}
+
+/**
+ * Renders the compact version of the header.
+ */
+export function renderCompactHeader(version = '1.0.0'): void {
+  console.log(chalk.bold(`AssetFlow v${version}`));
+  console.log(chalk.gray('────────────────────────────'));
+  console.log('');
 }
 
 /**
