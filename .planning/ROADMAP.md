@@ -2,20 +2,20 @@
 
 ## Overview
 
-Build AssetFlow CLI, a production-grade, zero-config CLI image optimization engine. The roadmap breaks development into 5 sequential phases: setting up infrastructure and image scanning, implementing the core Sharp-based compression/conversion engine, developing CLI commands and watch/git workflow modes, creating the health score doctor and reporting system, and completing verification/benchmarking and CI/CD integration.
+Build AssetFlow CLI, a production-grade, zero-config CLI image optimization engine. The roadmap breaks development into 5 sequential phases: setting up infrastructure and image scanning, implementing the core Sharp-based compression/conversion engine (including responsive resizing and multiple format support), developing CLI commands and watch/git workflow modes, creating the health score doctor, historical fingerprinting, and reporting system, and completing verification/benchmarking and CI/CD integration.
 
 ## Phases
 
-- [ ] **Phase 1: Setup & Discovery** - Setup TypeScript project structure, validate Zod config, and build recursive glob-based image scanner.
-- [ ] **Phase 2: Optimization Engine** - Integrate Sharp, build WebP/AVIF conversions, metadata stripping, directory preservation, and adaptive quality.
+- [ ] **Phase 1: Setup & Discovery** - Setup TypeScript project structure with npm metadata, validate Zod config, and build recursive glob-based image scanner.
+- [ ] **Phase 2: Optimization Engine** - Integrate Sharp, build WebP/AVIF/both format converters, metadata stripping, responsive variants generator, directory preservation, and adaptive quality.
 - [ ] **Phase 3: CLI Modes** - Implement Commander CLI hooks, Dry-Run, git-changed filtering, and real-time Chokidar Watch mode.
-- [ ] **Phase 4: Doctor & Reporting** - Build the CLI UX (chalk/ora), the audit doctor engine (health score/recommendations), and JSON/terminal output summary.
+- [ ] **Phase 4: Doctor & Reporting** - Build the cache manager (`.assetflow/cache.json`), the audit doctor engine (deterministic health score/largest assets/savings recommendations), the report printer, and JSON/terminal output summary.
 - [ ] **Phase 5: Verification & Release** - Achieve 95%+ test coverage with Vitest, generate benchmark scripts, and configure GitHub Actions CI/CD workflows.
 
 ## Phase Details
 
 ### Phase 1: Setup & Discovery
-**Goal**: Build project scaffold, Zod schema validator, and recursive file-system discovery engine.
+**Goal**: Build project scaffold with npm discovery metadata, Zod schema validator, and recursive file-system discovery engine.
 **Depends on**: Nothing
 **Requirements**: DISC-01, DISC-02, DISC-03, CONF-01, CONF-02
 **Success Criteria**:
@@ -28,18 +28,18 @@ Plans:
 - [ ] 01-01: Build project infrastructure, package config, and glob scanner
 
 ### Phase 2: Optimization Engine
-**Goal**: Core image optimization and format conversion using Sharp.
+**Goal**: Core image optimization, format conversion, and responsive scaling using Sharp.
 **Depends on**: Phase 1
-**Requirements**: OPT-01, OPT-02, OPT-03, OPT-04, OPT-05, OPT-06
+**Requirements**: OPT-01, OPT-02, OPT-03, OPT-04, OPT-05, OPT-06, OPT-07, OPT-08
 **Success Criteria**:
-  1. PNG and JPG images are successfully converted to WebP and AVIF.
-  2. All EXIF, GPS, and other metadata are stripped from output files.
-  3. Optimized output assets preserve their relative folder structures in the output destination.
-  4. Compression levels are automatically adjusted based on dimension constraints and compression potential.
+  1. PNG and JPG images are successfully converted to WebP, AVIF, or both formats.
+  2. Aspect ratio-preserving scaling generates only specified responsive width sizes.
+  3. All EXIF, GPS, and other metadata are stripped from output files unless keepMetadata is true.
+  4. Optimized output assets preserve their relative folder structures in the output destination.
 **Plans**: 1 plan
 
 Plans:
-- [ ] 02-01: Build core Sharp processing, compression presets, and relative output structure
+- [ ] 02-01: Build core Sharp processing, multi-format and responsive variant creation, and output directory layout
 
 ### Phase 3: CLI Modes
 **Goal**: Set up command line commands and execution patterns (Dry-run, Git diff changed files, and Chokidar directory watcher).
@@ -56,17 +56,17 @@ Plans:
 - [ ] 03-01: Integrate Commander CLI, dry-run, git diff tracker, and chokidar watcher
 
 ### Phase 4: Doctor & Reporting
-**Goal**: CLI terminal interface, Doctor health checking command, and JSON reporting formats.
+**Goal**: CLI terminal interface, Doctor health checking command, historical fingerprinting, and JSON/cache reporting formats.
 **Depends on**: Phase 3
-**Requirements**: REP-01, REP-02, REP-03
+**Requirements**: REP-01, REP-02, REP-03, REP-04, REP-05, REP-06
 **Success Criteria**:
   1. Interactive progress feedback is shown using ora spinners and clear chalk alerts.
-  2. Doctor command successfully calculates a Project Health Score and renders clear recommendations.
-  3. Command exits generate `assetflow-report.json` with details of all scanned and optimized files.
+  2. Doctor command successfully calculates a deterministic Project Health Score and renders clear recommendations and score improvements.
+  3. History is cached to `.assetflow/cache.json`, and running `report` prints optimization comparisons.
 **Plans**: 1 plan
 
 Plans:
-- [ ] 04-01: Build beautiful CLI UX, Doctor audit calculations, and json exporter
+- [ ] 04-01: Build beautiful CLI UX, Cache manager, Doctor calculations, and report runner
 
 ### Phase 5: Verification & Release
 **Goal**: Run tests, benchmark performance, and publish CI/CD.
