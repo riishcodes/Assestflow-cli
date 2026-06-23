@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 450" width="100%" height="100%">
+  <defs>
+    <radialGradient id="bg-grad" cx="50%" cy="50%" r="75%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Outline Frame -->
+  <rect width="700" height="450" rx="12" fill="url(#bg-grad)" stroke="#334155" stroke-width="1.5"/>
+
+  <!-- Window Header -->
+  <path d="M 0 12 A 12 12 0 0 1 12 0 L 688 0 A 12 12 0 0 1 700 12 L 700 40 L 0 40 Z" fill="#0f172a" opacity="0.8"/>
+  <circle cx="25" cy="20" r="5" fill="#ef4444"/>
+  <circle cx="41" cy="20" r="5" fill="#eab308"/>
+  <circle cx="57" cy="20" r="5" fill="#22c55e"/>
+  <text x="350" y="25" text-anchor="middle" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="12" font-weight="600" fill="#64748b">
+    Terminal — assetflow optimize
+  </text>
+
+  <!-- Doctor Audit Console Screen Output -->
+  <g transform="translate(40, 75)" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="12" fill="#cbd5e1" xml:space="preserve">
+    <!-- Exec command -->
+    <text x="0" y="0" font-weight="bold" fill="#38bdf8">$ <tspan fill="#f1f5f9">assetflow optimize --format both</tspan></text>
+    <text x="0" y="20" fill="#34d399">✔ <tspan fill="#94a3b8">Configuration loaded</tspan></text>
+    <text x="0" y="35" fill="#34d399">✔ <tspan fill="#94a3b8">Scan complete. Found 250 candidate image(s)</tspan></text>
+
+    <!-- Optimization info -->
+    <text x="0" y="65" fill="#38bdf8">Optimizing assets in parallel (limit: 4)...</text>
+
+    <!-- File progress logs -->
+    <text x="0" y="90" fill="#34d399">✔ <tspan fill="#fff" font-weight="bold">src/assets/hero.png</tspan> <tspan fill="#38bdf8">(640px)</tspan> <tspan fill="#64748b">→</tspan> <tspan fill="#fff" font-weight="bold">WEBP</tspan></text>
+    <text x="20" y="105" fill="#64748b">456.2 KB → 112.5 KB (75% reduction)</text>
+    
+    <text x="0" y="125" fill="#34d399">✔ <tspan fill="#fff" font-weight="bold">src/assets/hero.png</tspan> <tspan fill="#38bdf8">(640px)</tspan> <tspan fill="#64748b">→</tspan> <tspan fill="#fff" font-weight="bold">AVIF</tspan></text>
+    <text x="20" y="140" fill="#64748b">456.2 KB → 77.1 KB (83% reduction)</text>
+    
+    <text x="0" y="160" fill="#34d399">✔ <tspan fill="#fff" font-weight="bold">public/avatar.jpg</tspan> <tspan fill="#64748b">→</tspan> <tspan fill="#fff" font-weight="bold">WEBP</tspan></text>
+    <text x="20" y="175" fill="#64748b">12.4 KB → 4.8 KB (61% reduction)</text>
+    
+    <text x="0" y="195" fill="#34d399">✔ <tspan fill="#94a3b8">Optimization finished</tspan></text>
+    <text x="0" y="210" fill="#34d399">✔ <tspan fill="#94a3b8">Report saved to: assetflow-report.json</tspan></text>
+
+    <!-- Premium Summary Card -->
+    <g transform="translate(0, 225)">
+      <rect width="420" height="135" rx="8" fill="#0f172a" stroke="#1e293b" stroke-width="1.5"/>
+      <text x="15" y="25" font-weight="bold" fill="#38bdf8" font-size="13">AssetFlow CLI — Optimization Summary</text>
+      <line x1="15" y1="35" x2="405" y2="35" stroke="#1e293b" stroke-width="1.5"/>
+      
+      <text x="15" y="55" fill="#94a3b8">Processed Images:   <tspan fill="#fff">250</tspan></text>
+      <text x="15" y="72" fill="#94a3b8">Original Size:      <tspan fill="#fff">89.3 MB</tspan></text>
+      <text x="15" y="89" fill="#94a3b8">Optimized Size:     <tspan fill="#fff">47.7 MB</tspan></text>
+      <text x="15" y="106" fill="#94a3b8">Saved Space:        <tspan fill="#34d399" font-weight="bold">41.6 MB</tspan></text>
+      <text x="15" y="123" fill="#94a3b8">Average Reduction:  <tspan fill="#34d399" font-weight="bold">47%</tspan></text>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 180" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    
+    <!-- Node Gradients -->
+    <linearGradient id="blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    
+    <linearGradient id="emerald-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    
+    <!-- Marker Arrow -->
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 7 5 L 0 8.5 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <!-- Frame -->
+  <rect width="820" height="180" rx="12" fill="url(#bg)" stroke="#334155" stroke-width="1"/>
+
+  <!-- Pipeline Steps (5 Nodes) -->
+  <g transform="translate(25, 45)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="bold">
+    
+    <!-- Step 1: Scanner -->
+    <g transform="translate(0, 0)">
+      <rect width="120" height="60" rx="8" fill="url(#blue-grad)"/>
+      <text x="60" y="28" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="800">1. SCAN</text>
+      <text x="60" y="44" text-anchor="middle" fill="#0f172a" font-size="10" font-weight="500">Recursive discovery</text>
+    </g>
+
+    <!-- Connector 1 -> 2 -->
+    <line x1="120" y1="30" x2="160" y2="30" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- Step 2: Hashing -->
+    <g transform="translate(165, 0)">
+      <rect width="120" height="60" rx="8" fill="url(#blue-grad)"/>
+      <text x="60" y="28" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="800">2. HASH CHECK</text>
+      <text x="60" y="44" text-anchor="middle" fill="#0f172a" font-size="10" font-weight="500">Delta fingerprinting</text>
+    </g>
+
+    <!-- Connector 2 -> 3 -->
+    <line x1="120" y1="30" x2="160" y2="30" transform="translate(165, 0)" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- Step 3: Sharp Optimizer -->
+    <g transform="translate(330, 0)">
+      <rect width="120" height="60" rx="8" fill="url(#emerald-grad)"/>
+      <text x="60" y="28" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="800">3. OPTIMIZE</text>
+      <text x="60" y="44" text-anchor="middle" fill="#0f172a" font-size="10" font-weight="500">Sharp processing</text>
+    </g>
+
+    <!-- Connector 3 -> 4 -->
+    <line x1="120" y1="30" x2="160" y2="30" transform="translate(330, 0)" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- Step 4: Report Exporter -->
+    <g transform="translate(495, 0)">
+      <rect width="120" height="60" rx="8" fill="url(#blue-grad)"/>
+      <text x="60" y="28" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="800">4. REPORT</text>
+      <text x="60" y="44" text-anchor="middle" fill="#0f172a" font-size="10" font-weight="500">Write summary metrics</text>
+    </g>
+
+    <!-- Connector 4 -> 5 -->
+    <line x1="120" y1="30" x2="160" y2="30" transform="translate(495, 0)" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- Step 5: Cache Writer -->
+    <g transform="translate(660, 0)">
+      <rect width="110" height="60" rx="8" fill="url(#blue-grad)"/>
+      <text x="55" y="28" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="800">5. CACHE</text>
+      <text x="55" y="44" text-anchor="middle" fill="#0f172a" font-size="10" font-weight="500">Save cache.json</text>
+    </g>
+
+  </g>
+
+  <!-- Bottom Labels -->
+  <text x="30" y="145" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="500" fill="#64748b">
+    AssetFlow CLI Execution Pipeline
+  </text>
+</svg>

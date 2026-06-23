@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 320" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    
+    <!-- Bar Gradients -->
+    <linearGradient id="orig-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#64748b"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+    
+    <linearGradient id="balanced-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    
+    <linearGradient id="compress-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Outline Frame -->
+  <rect width="600" height="320" rx="12" fill="url(#bg-gradient)" stroke="#334155" stroke-width="1"/>
+
+  <!-- Chart Title -->
+  <text x="30" y="45" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="800" fill="#f8fafc">
+    Optimization Compression Metrics
+  </text>
+  <text x="30" y="65" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="500" fill="#64748b">
+    Dataset: 250 mixed-format images (Original: 89.3 MB)
+  </text>
+
+  <!-- Bar Chart Columns -->
+  <g transform="translate(30, 95)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+    <!-- Bar 1: Original -->
+    <g transform="translate(0, 0)">
+      <text x="0" y="18" font-size="13" font-weight="700" fill="#cbd5e1">Original Size</text>
+      <!-- Background track -->
+      <rect x="140" y="5" width="300" height="20" rx="4" fill="#334155" opacity="0.4"/>
+      <!-- Value bar -->
+      <rect x="140" y="5" width="300" height="20" rx="4" fill="url(#orig-grad)"/>
+      <text x="455" y="20" font-size="14" font-weight="800" fill="#cbd5e1">89.3 MB</text>
+      <text x="150" y="19" font-size="11" font-weight="bold" fill="#0f172a">100%</text>
+    </g>
+
+    <!-- Bar 2: Balanced Mode -->
+    <g transform="translate(0, 60)">
+      <text x="0" y="18" font-size="13" font-weight="700" fill="#38bdf8">Balanced Mode</text>
+      <!-- Background track -->
+      <rect x="140" y="5" width="300" height="20" rx="4" fill="#334155" opacity="0.4"/>
+      <!-- Value bar (62.8 / 89.3 = 70.3%) -->
+      <rect x="140" y="5" width="211" height="20" rx="4" fill="url(#balanced-grad)"/>
+      <text x="455" y="20" font-size="14" font-weight="800" fill="#38bdf8">62.8 MB</text>
+      <text x="365" y="20" font-size="11" font-weight="bold" fill="#38bdf8">-31%</text>
+    </g>
+
+    <!-- Bar 3: Compression Mode -->
+    <g transform="translate(0, 120)">
+      <text x="0" y="18" font-size="13" font-weight="700" fill="#34d399">Compression Mode</text>
+      <!-- Background track -->
+      <rect x="140" y="5" width="300" height="20" rx="4" fill="#334155" opacity="0.4"/>
+      <!-- Value bar (47.7 / 89.3 = 53.4%) -->
+      <rect x="140" y="5" width="160" height="20" rx="4" fill="url(#compress-grad)"/>
+      <text x="455" y="20" font-size="14" font-weight="800" fill="#34d399">47.7 MB</text>
+      <text x="315" y="20" font-size="11" font-weight="bold" fill="#34d399">-47%</text>
+    </g>
+  </g>
+
+  <!-- Bottom Details Summary -->
+  <g transform="translate(30, 265)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" fill="#94a3b8">
+    <text x="0" y="15">• Balanced Mode retains excellent fidelity for standard web projects.</text>
+    <text x="0" y="32">• Compression Mode targets maximum compression ratio for high-load platforms.</text>
+  </g>
+</svg>

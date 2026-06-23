@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 450" width="100%" height="100%">
+  <defs>
+    <radialGradient id="bg-grad" cx="50%" cy="50%" r="75%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Outline Frame -->
+  <rect width="700" height="450" rx="12" fill="url(#bg-grad)" stroke="#334155" stroke-width="1.5"/>
+
+  <!-- Window Header -->
+  <path d="M 0 12 A 12 12 0 0 1 12 0 L 688 0 A 12 12 0 0 1 700 12 L 700 40 L 0 40 Z" fill="#0f172a" opacity="0.8"/>
+  <circle cx="25" cy="20" r="5" fill="#ef4444"/>
+  <circle cx="41" cy="20" r="5" fill="#eab308"/>
+  <circle cx="57" cy="20" r="5" fill="#22c55e"/>
+  <text x="350" y="25" text-anchor="middle" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="12" font-weight="600" fill="#64748b">
+    Terminal — assetflow report
+  </text>
+
+  <!-- Doctor Audit Console Screen Output -->
+  <g transform="translate(40, 80)" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="13" fill="#cbd5e1" xml:space="preserve">
+    <!-- Exec command -->
+    <text x="0" y="0" font-weight="bold" fill="#38bdf8">$ <tspan fill="#f1f5f9">assetflow report</tspan></text>
+
+    <!-- Report Header -->
+    <text x="0" y="35" font-weight="bold" fill="#22d5ee">Last Optimization Report</text>
+    <text x="0" y="50" fill="#64748b">Generated at: 6/23/2026, 5:15:12 PM</text>
+    <text x="0" y="65" fill="#475569">──────────────────────────────────────────────────────────────────</text>
+
+    <!-- Stats -->
+    <text x="0" y="90" fill="#94a3b8">Total Scanned Images:   <tspan fill="#fff">250</tspan></text>
+    <text x="0" y="110" fill="#94a3b8">Original Total Size:    <tspan fill="#fff">89.3 MB</tspan></text>
+    <text x="0" y="130" fill="#94a3b8">Optimized Total Size:   <tspan fill="#fff">47.7 MB</tspan></text>
+    <text x="0" y="150" fill="#94a3b8">Space Saved:            <tspan fill="#34d399" font-weight="bold">41.6 MB</tspan></text>
+    <text x="0" y="170" fill="#94a3b8">Reduction Ratio:        <tspan fill="#34d399" font-weight="bold">47%</tspan></text>
+    <text x="0" y="190" fill="#94a3b8">Project Health Score:   <tspan fill="#38bdf8" font-weight="bold">88 / 100</tspan></text>
+
+    <!-- Progress delta -->
+    <text x="0" y="235" font-weight="bold" fill="#22d5ee">Historical Progress Delta:</text>
+    <text x="20" y="260" fill="#34d399">• <tspan fill="#fff">Score Improvement:  </tspan><tspan font-weight="bold">+48 points</tspan></text>
+    <text x="20" y="280" fill="#34d399">• <tspan fill="#fff">Saved Size Delta:   </tspan><tspan font-weight="bold">41.6 MB</tspan></text>
+    <text x="20" y="300" fill="#cbd5e1">• <tspan fill="#fff">Scanned Files Delta: </tspan><tspan font-weight="bold">+0 images</tspan></text>
+
+    <!-- Separation line -->
+    <text x="0" y="335" fill="#475569">──────────────────────────────────────────────────────────────────</text>
+    <text x="0" y="360" fill="#94a3b8">Historical caching records match .assetflow/cache.json fingerprint</text>
+  </g>
+</svg>

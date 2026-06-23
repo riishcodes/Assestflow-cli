@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 380" width="100%" height="100%">
+  <defs>
+    <!-- Background Shadow -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#020617" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <rect width="600" height="380" fill="transparent"/>
+
+  <!-- Terminal Window -->
+  <g filter="url(#shadow)">
+    <!-- Terminal Outer Frame -->
+    <rect x="20" y="20" width="560" height="320" rx="10" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+    
+    <!-- Window Header -->
+    <rect x="20" y="20" width="560" height="40" rx="10" fill="#1e293b"/>
+    <!-- Circles -->
+    <circle cx="45" cy="40" r="6" fill="#ef4444"/>
+    <circle cx="63" cy="40" r="6" fill="#eab308"/>
+    <circle cx="81" cy="40" r="6" fill="#22c55e"/>
+    <!-- Title -->
+    <text x="300" y="45" text-anchor="middle" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#94a3b8">
+      bash — assetflow doctor
+    </text>
+  </g>
+
+  <!-- Terminal Body Content -->
+  <g transform="translate(45, 90)" font-family="SFMono-Regular, Consolas, Menlo, Monaco, monospace" font-size="14" fill="#cbd5e1" line-height="1.5">
+    <!-- Prompt line -->
+    <text x="0" y="0" font-weight="bold" fill="#38bdf8">$ <tspan fill="#f1f5f9">assetflow doctor</tspan></text>
+    
+    <!-- Spinner sequence -->
+    <text x="0" y="25" fill="#34d399">✔ <tspan fill="#94a3b8">Audit check finished</tspan></text>
+    
+    <!-- Header banner -->
+    <text x="0" y="60" font-weight="bold" fill="#22d5ee">Project Image Audit</text>
+    <text x="0" y="75" fill="#475569">────────────────────────────────────────────────────────</text>
+    
+    <!-- Metrics -->
+    <text x="0" y="105" font-weight="bold" fill="#f8fafc">Project Health Score:<tspan fill="#eab308" x="200">88 / 100</tspan></text>
+    <text x="0" y="125" fill="#64748b">(Previous Score: 40 | Improvement: +48 points)</text>
+    
+    <text x="0" y="155" font-weight="bold" fill="#f8fafc">Framework Detected:<tspan fill="#38bdf8" font-weight="bold" x="200">Next.js (App Router)</tspan></text>
+    <text x="0" y="175" font-weight="bold" fill="#f8fafc">Scanned Images:<tspan fill="#cbd5e1" x="200">250</tspan></text>
+    <text x="0" y="195" font-weight="bold" fill="#f8fafc">Total File Size:<tspan fill="#cbd5e1" x="200">89.3 MB</tspan></text>
+    <text x="0" y="215" font-weight="bold" fill="#f8fafc">Potential Savings:<tspan fill="#34d399" font-weight="bold" x="200">41.6 MB (47%)</tspan></text>
+    
+    <!-- Section recommendations -->
+    <text x="0" y="250" font-weight="bold" fill="#22d5ee">Recommendations:</text>
+    <text x="15" y="275" fill="#eab308">• <tspan fill="#cbd5e1">Convert 120 PNG files to WebP/AVIF to reduce sizes.</tspan></text>
+    <text x="15" y="295" fill="#eab308">• <tspan fill="#cbd5e1">Strip unneeded EXIF metadata from 85 camera assets.</tspan></text>
+  </g>
+</svg>
