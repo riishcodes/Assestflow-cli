@@ -23,7 +23,7 @@ See: .planning/PROJECT.md (updated 2026-06-23)
 Phase: 1 of 5 (Setup & Discovery)
 Plan: 0 of 1 in current phase
 Status: Planning
-Last activity: 2026-06-23 — Initialized GSD planning documents (PROJECT.md, REQUIREMENTS.md, ROADMAP.md)
+Last activity: 2026-06-23 — Updated planning files for new requirements (webp/avif/both, responsive resizing, deterministic scoring, cache/fingerprinting)
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -42,6 +42,9 @@ Progress: [░░░░░░░░░░] 0%
 ### Decisions
 
 - Initialized tech stack: Node.js, TypeScript, Sharp, Commander, fast-glob, chokidar, chalk, ora, zod, pretty-bytes, execa, vitest.
+- Replaced "original" format with "webp" | "avif" | "both" format configurations.
+- Added responsive variants generation (`sizes` array config, e.g. `[640, 1280]`).
+- Set up caching mechanism under `.assetflow/cache.json`.
 
 ### Pending Todos
 
@@ -57,6 +60,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-23 10:20
-Stopped at: Initialized planning documents
+Last session: 2026-06-23 10:28
+Stopped at: Updated planning documents to reflect new architecture and MVP scope adjustments
 Resume file: None
