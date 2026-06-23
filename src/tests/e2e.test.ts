@@ -20,8 +20,8 @@ describe('AssetFlow CLI — E2E Command Integration', () => {
   it('should run dry-run optimization and estimate savings without writing files', async () => {
     const { stdout } = await execa('node', [cliBinary, '--dry-run'], { cwd: root });
 
-    expect(stdout).toContain('Optimizing assets');
-    expect(stdout).toContain('Optimization Summary');
+    expect(stdout).toContain('Optimizing Assets');
+    expect(stdout).toContain('Before / After Size Comparison');
     
     // Verify no optimized output files were generated
     const webpExists = await fs.stat(path.join(root, 'public', 'images', 'hero.webp'))
@@ -33,8 +33,8 @@ describe('AssetFlow CLI — E2E Command Integration', () => {
   it('should run optimization and write WebP files to disk', async () => {
     const { stdout } = await execa('node', [cliBinary], { cwd: root });
 
-    expect(stdout).toContain('Source Images:');
-    expect(stdout).toContain('AssetFlow CLI — Optimization Summary');
+    expect(stdout).toContain('Source Images');
+    expect(stdout).toContain('Optimization Complete');
     
     // Verify WebP files exist
     const heroWebpExists = await fs.stat(path.join(root, 'public', 'images', 'hero.webp'))
@@ -56,21 +56,18 @@ describe('AssetFlow CLI — E2E Command Integration', () => {
     const parsed = JSON.parse(reportContent);
     expect(parsed.summary.sourceImages).toBe(2);
     expect(parsed.healthScore).toBe(100); // 100 since WebPs now exist!
-    expect(parsed.version).toBe('0.1.0');
+    expect(parsed.version).toBe('1.0.0');
     expect(parsed.config).toBeDefined();
   });
 
   it('should run doctor command and return health status info', async () => {
     const { stdout } = await execa('node', [cliBinary, 'doctor'], { cwd: root });
 
-    expect(stdout).toContain('Project Image Audit');
-    expect(stdout).toContain('Project Health Score');
-    expect(stdout).toContain('Source Images:');
-    expect(stdout).toContain('Existing Optimized Assets:');
-    expect(stdout).toContain('Total Files Detected:');
-    expect(stdout).toContain('Top 10 Largest Files');
-    expect(stdout).toContain('Top 10 Savings Opportunities');
-    expect(stdout).toContain('Folder Breakdown');
+    expect(stdout).toContain('Health Score');
+    expect(stdout).toContain('Breakdown');
+    expect(stdout).toContain('Largest Assets');
+    expect(stdout).toContain('Top Savings Opportunities');
+    expect(stdout).toContain('Folder Performance Breakdown');
     expect(stdout).toContain('Recommendations');
   });
 
@@ -78,11 +75,9 @@ describe('AssetFlow CLI — E2E Command Integration', () => {
     const { stdout } = await execa('node', [cliBinary, 'report'], { cwd: root });
 
     expect(stdout).toContain('Last Optimization Report');
-    expect(stdout).toContain('Source Images:');
-    expect(stdout).toContain('Existing Optimized Assets:');
-    expect(stdout).toContain('Original Total Size');
-    expect(stdout).toContain('Space Saved');
-    expect(stdout).toContain('Largest Saving Asset');
+    expect(stdout).toContain('Project Size');
+    expect(stdout).toContain('Health Score');
+    expect(stdout).toContain('Before / After Size Comparison');
     expect(stdout).toContain('Average Savings Per File');
     expect(stdout).toContain('Folder-Level Savings Breakdown');
   });

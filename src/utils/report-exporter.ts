@@ -42,6 +42,12 @@ export interface ReportJsonData {
   warnings: string[];
   recommendations: string[];
   healthScore: number | null;
+  breakdown?: {
+    sizeEfficiency: number;
+    modernFormats: number;
+    metadataHygiene: number;
+    assetOptimization: number;
+  };
 }
 
 /**
@@ -51,13 +57,15 @@ export interface ReportJsonData {
  * @param config Configuration used during optimization
  * @param healthScore Determined health score (optional)
  * @param recommendations Custom tips generated (optional)
+ * @param breakdown Score category ratings breakdown (optional)
  */
 export async function exportReportJson(
   projectRoot: string,
   results: OptimizationResult[],
   config: AssetFlowConfig,
   healthScore: number | null = null,
-  recommendations: string[] = []
+  recommendations: string[] = [],
+  breakdown?: ReportJsonData['breakdown']
 ): Promise<string> {
   const filePath = path.join(projectRoot, 'assetflow-report.json');
 
@@ -122,8 +130,17 @@ export async function exportReportJson(
     }
   }
 
+  let reportVersion = '1.0.0';
+  try {
+    const pkgContent = await fs.readFile(path.join(projectRoot, 'package.json'), 'utf8');
+    const pkg = JSON.parse(pkgContent);
+    if (pkg.version) reportVersion = pkg.version;
+  } catch {
+    // Fallback to default
+  }
+
   const reportData: ReportJsonData = {
-    version: '0.1.0',
+    version: reportVersion,
     generatedAt: new Date().toISOString(),
     config,
     timestamp: new Date().toISOString(),
@@ -144,6 +161,7 @@ export async function exportReportJson(
     warnings,
     recommendations,
     healthScore,
+    breakdown,
   };
 
   await fs.writeFile(filePath, JSON.stringify(reportData, null, 2), 'utf8');

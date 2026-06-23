@@ -47,35 +47,7 @@ async function detectProjectType(projectRoot: string): Promise<string> {
   }
 }
 
-/**
- * Renders a premium startup sequence under 800ms.
- */
-async function playStartupSequence(version: string, framework: string, mode: string): Promise<void> {
-  console.log(`\n  ${chalk.cyan.bold('AssetFlow')} v${version}`);
-  console.log(`  ${chalk.gray('Project:')} ${chalk.white(framework)}`);
-  console.log(`  ${chalk.gray('Mode:')}    ${chalk.white(mode)}`);
-  console.log(chalk.cyan('  ──────────────────────────────────────────'));
-  
-  const steps = [
-    'Project detected',
-    'Configuration loaded',
-    'Asset discovery complete',
-    'Analysis complete'
-  ];
-  
-  if (logger.areAnimationsEnabled()) {
-    for (const step of steps) {
-      logger.startSpinner(step);
-      await new Promise(resolve => setTimeout(resolve, 150)); // 600ms total
-    }
-    logger.stopSpinner(true, 'Analysis complete');
-  } else {
-    for (const step of steps) {
-      console.log(`  ${chalk.green('✓')} ${step}`);
-    }
-  }
-  console.log('');
-}
+
 
 // Helper for parallel task limiting
 async function processInParallel<T, R>(
@@ -224,31 +196,23 @@ async function handleOptimizeCommand(projectRoot: string, options: any): Promise
   logger.setAnimationsEnabled(!disableAnimations);
   
   try {
-    await playStartupSequence(version, framework, options.dryRun ? 'Dry Run' : 'Optimize');
+    logger.printBrandedHeader(version, framework);
 
-    logger.startSpinner('Loading configuration...');
     const fileConfig = await loadConfig(projectRoot);
     const config = mergeConfig(fileConfig, options);
-    logger.stopSpinner(true, 'Configuration loaded');
 
     let files: ScannedFile[] = [];
 
     if (options.changed) {
-      logger.startSpinner('Scanning git repository for changes...');
       const changedFilesList = await getChangedFiles(projectRoot);
-      
       if (changedFilesList === null) {
-        logger.stopSpinner(false, 'Not in a Git repository. Falling back to full directory scan.');
         files = await scanDirectories(projectRoot, config);
       } else {
-        logger.stopSpinner(true, `Found ${changedFilesList.length} changed path(s) in Git`);
         const allScanned = await scanDirectories(projectRoot, config);
         files = allScanned.filter(f => changedFilesList.includes(f.relativePath));
       }
     } else {
-      logger.startSpinner('Scanning image directories...');
       files = await scanDirectories(projectRoot, config);
-      logger.stopSpinner(true, 'Scan complete');
     }
 
     const sourceImages = files.filter(f => ['png', 'jpg', 'jpeg'].includes(f.extension));
@@ -257,8 +221,16 @@ async function handleOptimizeCommand(projectRoot: string, options: any): Promise
     // Health score audit before optimizations
     const auditBefore = await runDoctorAudit(files, config);
 
+    // Play Claude-Style Thinking Timeline
+    await logger.playThinkingTimeline({
+      framework,
+      imagesCount: sourceImages.length,
+      savings: formatSize(auditBefore.potentialSavingsBytes),
+      score: auditBefore.healthScore,
+      recsCount: auditBefore.recommendations.length
+    });
+
     // Project detection card representation
-    const largestAsset = auditBefore.largestAssets[0];
     logger.printProjectCard(
       version,
       framework,
@@ -267,9 +239,7 @@ async function handleOptimizeCommand(projectRoot: string, options: any): Promise
       generatedAssetsCount,
       files.length,
       formatSize(auditBefore.totalSize),
-      formatSize(auditBefore.potentialSavingsBytes),
-      largestAsset?.path,
-      largestAsset ? formatSize(largestAsset.size) : undefined
+      formatSize(auditBefore.potentialSavingsBytes)
     );
 
     if (sourceImages.length === 0) {
@@ -279,8 +249,6 @@ async function handleOptimizeCommand(projectRoot: string, options: any): Promise
 
     const previousCache = await readCache(projectRoot);
     const cachedHashes = previousCache?.hashes || {};
-
-    console.log(`  ${chalk.cyan('Optimizing assets in parallel (limit: 4)...')}\n`);
 
     let completed = 0;
     const progressStartTime = Date.now();
@@ -330,10 +298,8 @@ async function handleOptimizeCommand(projectRoot: string, options: any): Promise
     const summary = compileSummary(processedResults, executionTimeMs);
 
     // Audit after to compile new score
-    logger.startSpinner('Compiling report data...');
     const finalScan = options.dryRun ? files : await scanDirectories(projectRoot, config);
     const auditAfter = await runDoctorAudit(finalScan, config);
-    logger.stopSpinner(true, 'Report data compiled');
 
     // Rewards Dashboard Card
     logger.printCompletionCard(summary, auditBefore.healthScore, auditAfter.healthScore);
@@ -348,7 +314,8 @@ async function handleOptimizeCommand(projectRoot: string, options: any): Promise
         processedResults,
         config,
         auditAfter.healthScore,
-        auditAfter.recommendations
+        auditAfter.recommendations,
+        auditAfter.breakdown
       );
       logger.printSuccess(`Report saved to: ${chalk.gray(path.basename(reportPath))}`);
 
@@ -368,7 +335,6 @@ async function handleOptimizeCommand(projectRoot: string, options: any): Promise
       });
     }
   } catch (error: any) {
-    logger.stopSpinner(false, 'Execution aborted');
     logger.printError(error.message || String(error));
     process.exit(1);
   }
@@ -431,7 +397,7 @@ async function handleWatchCommand(projectRoot: string, options: any): Promise<vo
       try {
         const finalScan = await scanDirectories(projectRoot, config);
         const audit = await runDoctorAudit(finalScan, config);
-        await exportReportJson(projectRoot, [result], config, audit.healthScore, audit.recommendations);
+        await exportReportJson(projectRoot, [result], config, audit.healthScore, audit.recommendations, audit.breakdown);
 
         const previousCache = await readCache(projectRoot);
         const newHashes = previousCache ? { ...previousCache.hashes } : {};
@@ -470,20 +436,23 @@ async function handleDoctorCommand(projectRoot: string, options: any): Promise<v
   logger.setAnimationsEnabled(!disableAnimations);
 
   try {
-    await playStartupSequence(version, framework, 'Doctor Audit');
+    logger.printBrandedHeader(version, framework);
 
-    logger.startSpinner('Analyzing project image health...');
     const config = await loadConfig(projectRoot);
     const files = await scanDirectories(projectRoot, config);
     const audit = await runDoctorAudit(files, config);
     const previousCache = await readCache(projectRoot);
-    logger.stopSpinner(true, 'Audit check finished');
 
-    console.log(`\n  ${chalk.cyan.bold('Project Image Audit')}`);
-    console.log(`  ────────────────────────────────────────────────────────\n`);
+    // Play Claude-Style Thinking Timeline
+    await logger.playThinkingTimeline({
+      framework,
+      imagesCount: audit.totalImages,
+      savings: formatSize(audit.potentialSavingsBytes),
+      score: audit.healthScore,
+      recsCount: audit.recommendations.length
+    });
 
     // 1. Project Card
-    const largestAsset = audit.largestAssets[0];
     logger.printProjectCard(
       version,
       framework,
@@ -492,13 +461,11 @@ async function handleDoctorCommand(projectRoot: string, options: any): Promise<v
       audit.generatedAssets,
       audit.totalFilesDetected,
       formatSize(audit.totalSize),
-      formatSize(audit.potentialSavingsBytes),
-      largestAsset?.path,
-      largestAsset ? formatSize(largestAsset.size) : undefined
+      formatSize(audit.potentialSavingsBytes)
     );
 
     // 2. Graded Health Score gauge
-    logger.printPremiumHealthScore(audit.healthScore);
+    logger.printPremiumHealthScore(audit.healthScore, audit.breakdown);
 
     if (previousCache) {
       const delta = compareCache(audit.healthScore, audit.totalSize, audit.totalImages, previousCache);
@@ -593,7 +560,7 @@ async function handleReportCommand(projectRoot: string, options: any): Promise<v
 
     // Health Score visual bar
     if (reportData.healthScore !== null) {
-      logger.printPremiumHealthScore(reportData.healthScore);
+      logger.printPremiumHealthScore(reportData.healthScore, reportData.breakdown);
     }
 
     if (previousCache) {

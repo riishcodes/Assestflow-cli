@@ -28,7 +28,8 @@
     "dev": "tsc -w",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "image-optimization",
@@ -48,12 +49,16 @@
     "commander": "^12.1.0",
     "execa": "^8.0.1",
     "fast-glob": "^3.3.2",
+    "gradient-string": "^2.0.2",
+    "log-update": "^6.0.0",
     "ora": "^8.0.1",
     "pretty-bytes": "^6.1.1",
     "sharp": "^0.33.4",
+    "string-width": "^7.1.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/gradient-string": "^1.1.2",
     "@types/node": "^20.14.9",
     "typescript": "^5.5.2",
     "vitest": "^1.6.0"

@@ -23,6 +23,12 @@ export interface DoctorReport {
   folderBreakdown: FolderBreakdownItem[];
   deductions: { reason: string; points: number }[];
   recommendations: string[];
+  breakdown: {
+    sizeEfficiency: number;
+    modernFormats: number;
+    metadataHygiene: number;
+    assetOptimization: number;
+  };
 }
 
 /**
@@ -219,21 +225,21 @@ export async function runDoctorAudit(files: ScannedFile[], config?: AssetFlowCon
   }
 
   // Calculate weighted health score
-  if (sourceImages.length === 0) {
-    healthScore = 100;
-  } else {
-    const sizeEfficiencyScore = totalSize > 0
-      ? (1 - (potentialSavingsBytes / totalSize)) * 100
-      : 100;
+  let sizeEfficiency = 100;
+  let modernFormats = 100;
+  let assetOptimization = 100;
+  let metadataHygiene = 100;
 
-    const modernFormatsScore = ((sourceImages.length - missingAlternativesCount) / sourceImages.length) * 100;
-    const oversizedAssetsScore = ((sourceImages.length - oversizedImagesCount) / sourceImages.length) * 100;
-    const metadataHygieneScore = ((sourceImages.length - metadataCount) / sourceImages.length) * 100;
+  if (sourceImages.length > 0) {
+    sizeEfficiency = Math.round(totalSize > 0 ? (1 - (potentialSavingsBytes / totalSize)) * 100 : 100);
+    modernFormats = Math.round(((sourceImages.length - missingAlternativesCount) / sourceImages.length) * 100);
+    assetOptimization = Math.round(((sourceImages.length - oversizedImagesCount) / sourceImages.length) * 100);
+    metadataHygiene = Math.round(((sourceImages.length - metadataCount) / sourceImages.length) * 100);
 
-    healthScore = (sizeEfficiencyScore * 0.40) +
-                  (modernFormatsScore * 0.25) +
-                  (oversizedAssetsScore * 0.25) +
-                  (metadataHygieneScore * 0.10);
+    healthScore = (sizeEfficiency * 0.40) +
+                  (modernFormats * 0.25) +
+                  (assetOptimization * 0.25) +
+                  (metadataHygiene * 0.10);
   }
 
   // Cap healthScore securely to stay between 0 and 100
@@ -289,5 +295,11 @@ export async function runDoctorAudit(files: ScannedFile[], config?: AssetFlowCon
     folderBreakdown,
     deductions,
     recommendations,
+    breakdown: {
+      sizeEfficiency,
+      modernFormats,
+      metadataHygiene,
+      assetOptimization,
+    },
   };
 }
