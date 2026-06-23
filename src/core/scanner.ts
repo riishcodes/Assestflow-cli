@@ -65,8 +65,11 @@ export async function scanDirectories(
     stats: false,
   });
 
+  // De-duplicate absolute paths to avoid overlap matches
+  const uniqueFiles = Array.from(new Set(files));
+
   // Map absolute paths back to ScannedFile format and filter out any path traversal attempts
-  return files
+  return uniqueFiles
     .map((absPath) => {
       const relativePath = path.relative(projectRoot, absPath);
       const extension = path.extname(absPath).slice(1).toLowerCase();

@@ -254,23 +254,28 @@ async function handleOptimizeCommand(projectRoot: string, options: any): Promise
     const sourceImages = files.filter(f => ['png', 'jpg', 'jpeg'].includes(f.extension));
     const generatedAssetsCount = files.length - sourceImages.length;
 
+    // Health score audit before optimizations
+    const auditBefore = await runDoctorAudit(files, config);
+
     // Project detection card representation
+    const largestAsset = auditBefore.largestAssets[0];
     logger.printProjectCard(
       version,
       framework,
       sourceImages.length,
       options.dryRun ? 'Dry Run' : 'Optimize',
       generatedAssetsCount,
-      files.length
+      files.length,
+      formatSize(auditBefore.totalSize),
+      formatSize(auditBefore.potentialSavingsBytes),
+      largestAsset?.path,
+      largestAsset ? formatSize(largestAsset.size) : undefined
     );
 
     if (sourceImages.length === 0) {
       logger.printWarning('No unoptimized PNG, JPG, or JPEG images found to process.');
       return;
     }
-
-    // Health score audit before optimizations
-    const auditBefore = await runDoctorAudit(files, config);
 
     const previousCache = await readCache(projectRoot);
     const cachedHashes = previousCache?.hashes || {};
@@ -478,13 +483,18 @@ async function handleDoctorCommand(projectRoot: string, options: any): Promise<v
     console.log(`  ────────────────────────────────────────────────────────\n`);
 
     // 1. Project Card
+    const largestAsset = audit.largestAssets[0];
     logger.printProjectCard(
       version,
       framework,
       audit.totalImages,
       'Doctor Audit',
       audit.generatedAssets,
-      audit.totalFilesDetected
+      audit.totalFilesDetected,
+      formatSize(audit.totalSize),
+      formatSize(audit.potentialSavingsBytes),
+      largestAsset?.path,
+      largestAsset ? formatSize(largestAsset.size) : undefined
     );
 
     // 2. Graded Health Score gauge
@@ -555,6 +565,18 @@ async function handleReportCommand(projectRoot: string, options: any): Promise<v
     const generatedAssetsCount = reportData.summary.generatedAssets ?? 0;
     const totalFilesCount = reportData.summary.totalFilesDetected ?? (sourceImagesCount + generatedAssetsCount);
 
+    // Find largest file in reportData
+    let largestFile: any = null;
+    let maxOriginalSize = -1;
+    if (reportData.files && reportData.files.length > 0) {
+      for (const file of reportData.files) {
+        if (file.originalSize > maxOriginalSize) {
+          maxOriginalSize = file.originalSize;
+          largestFile = file;
+        }
+      }
+    }
+
     // Overview Card representation
     logger.printProjectCard(
       version,
@@ -562,7 +584,11 @@ async function handleReportCommand(projectRoot: string, options: any): Promise<v
       sourceImagesCount,
       'Report Review',
       generatedAssetsCount,
-      totalFilesCount
+      totalFilesCount,
+      formatSize(reportData.summary.totalOriginalSize),
+      formatSize(reportData.summary.spaceSaved),
+      largestFile?.filePath,
+      largestFile ? formatSize(largestFile.originalSize) : undefined
     );
 
     // Health Score visual bar

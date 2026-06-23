@@ -66,7 +66,7 @@ describe('AssetFlow CLI — E2E Command Integration', () => {
     expect(stdout).toContain('Project Image Audit');
     expect(stdout).toContain('Project Health Score');
     expect(stdout).toContain('Source Images:');
-    expect(stdout).toContain('Generated Assets:');
+    expect(stdout).toContain('Existing Optimized Assets:');
     expect(stdout).toContain('Total Files Detected:');
     expect(stdout).toContain('Top 10 Largest Files');
     expect(stdout).toContain('Top 10 Savings Opportunities');
@@ -79,7 +79,7 @@ describe('AssetFlow CLI — E2E Command Integration', () => {
 
     expect(stdout).toContain('Last Optimization Report');
     expect(stdout).toContain('Source Images:');
-    expect(stdout).toContain('Generated Assets:');
+    expect(stdout).toContain('Existing Optimized Assets:');
     expect(stdout).toContain('Original Total Size');
     expect(stdout).toContain('Space Saved');
     expect(stdout).toContain('Largest Saving Asset');

@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import ora, { type Ora } from 'ora';
 import readline from 'node:readline';
+import path from 'node:path';
 import { formatSize, getReductionPercentage, type ReportSummary } from './metrics.js';
 import type { OptimizationResult } from '../core/optimizer.js';
 import type { FolderBreakdownItem } from '../core/doctor-engine.js';
@@ -100,17 +101,31 @@ export function printProjectCard(
   imageCount: number,
   mode: string,
   generatedCount?: number,
-  totalDetectedCount?: number
+  totalDetectedCount?: number,
+  projectSize?: string,
+  potentialSavings?: string,
+  largestAssetPath?: string,
+  largestAssetSize?: string
 ): void {
   if (!animationsEnabled) {
     console.log(`AssetFlow v${version}`);
     console.log(`Framework: ${framework}`);
     console.log(`Source Images: ${imageCount}`);
     if (generatedCount !== undefined) {
-      console.log(`Generated Assets: ${generatedCount}`);
+      console.log(`Existing Optimized Assets: ${generatedCount}`);
     }
     if (totalDetectedCount !== undefined) {
       console.log(`Total Files Detected: ${totalDetectedCount}`);
+    }
+    if (projectSize !== undefined) {
+      console.log(`Project Size: ${projectSize}`);
+    }
+    if (potentialSavings !== undefined) {
+      console.log(`Potential Savings: ${potentialSavings}`);
+    }
+    if (largestAssetPath !== undefined) {
+      const displayPath = largestAssetSize ? `${largestAssetPath} (${largestAssetSize})` : largestAssetPath;
+      console.log(`Largest Asset: ${displayPath}`);
     }
     console.log(`Mode: ${mode}`);
     console.log('──────────────────────────────────────────\n');
@@ -125,10 +140,36 @@ export function printProjectCard(
   console.log(`  │  ${chalk.gray('Framework:')}  ${chalk.white(framework.padEnd(18))}  │`);
   console.log(`  │  ${chalk.gray('Source Images:')} ${chalk.white(imageCount.toString().padEnd(14))}   │`);
   if (generatedCount !== undefined) {
-    console.log(`  │  ${chalk.gray('Generated Assets:')} ${chalk.white(generatedCount.toString().padEnd(11))}   │`);
+    console.log(`  │  ${chalk.gray('Existing Optimized Assets:')} ${chalk.white(generatedCount.toString().padEnd(3))}  │`);
   }
   if (totalDetectedCount !== undefined) {
-    console.log(`  │  ${chalk.gray('Total Files Detected:')} ${chalk.white(totalDetectedCount.toString().padEnd(8))}   │`);
+    console.log(`  │  ${chalk.gray('Total Files Detected:')} ${chalk.white(totalDetectedCount.toString().padEnd(7))}   │`);
+  }
+  if (projectSize !== undefined) {
+    console.log(`  │  ${chalk.gray('Project Size:')} ${chalk.white(projectSize.padEnd(15))}   │`);
+  }
+  if (potentialSavings !== undefined) {
+    console.log(`  │  ${chalk.gray('Potential Savings:')} ${chalk.white(potentialSavings.padEnd(10))}   │`);
+  }
+  if (largestAssetPath !== undefined) {
+    let largestAssetStr = '';
+    if (largestAssetSize) {
+      const fileName = path.basename(largestAssetPath);
+      const sizeStr = largestAssetSize;
+      const maxFileNameLen = 15 - sizeStr.length - 3;
+      const displayName = maxFileNameLen > 2 && fileName.length > maxFileNameLen
+        ? fileName.slice(0, maxFileNameLen - 3) + '...'
+        : fileName;
+      largestAssetStr = `${displayName} (${sizeStr})`;
+      if (largestAssetStr.length > 15) {
+        largestAssetStr = largestAssetStr.slice(0, 12) + '...';
+      }
+    } else {
+      largestAssetStr = largestAssetPath.length > 15
+        ? largestAssetPath.slice(0, 12) + '...'
+        : largestAssetPath;
+    }
+    console.log(`  │  ${chalk.gray('Largest Asset:')} ${chalk.white(largestAssetStr.padEnd(14))}   │`);
   }
   console.log(`  │  ${chalk.gray('Mode:')}       ${chalk.white(mode.padEnd(18))}  │`);
   console.log(border('  ╰──────────────────────────────────╯\n'));

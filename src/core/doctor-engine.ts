@@ -125,6 +125,7 @@ export async function runDoctorAudit(files: ScannedFile[], config?: AssetFlowCon
   let missingAlternativesCount = 0;
   let over1MbCount = 0;
   let pngOver500KbCount = 0;
+  let oversizedImagesCount = 0;
   let potentialSavingsBytes = 0;
 
   const savingsOpportunities: { path: string; size: number; savings: number }[] = [];
@@ -132,11 +133,12 @@ export async function runDoctorAudit(files: ScannedFile[], config?: AssetFlowCon
 
   for (const detail of fileDetails) {
     const { file, size } = detail;
+    let isOversized = false;
 
     // Deduct for files larger than 1MB (-5 points)
     if (size > 1024 * 1024) {
       over1MbCount++;
-      healthScore -= 5;
+      isOversized = true;
       deductions.push({
         reason: `Image "${file.relativePath}" is larger than 1MB`,
         points: 5,
@@ -146,11 +148,15 @@ export async function runDoctorAudit(files: ScannedFile[], config?: AssetFlowCon
     // Deduct for PNGs larger than 500KB (-2 points)
     if (file.extension === 'png' && size > 500 * 1024) {
       pngOver500KbCount++;
-      healthScore -= 2;
+      isOversized = true;
       deductions.push({
         reason: `PNG image "${file.relativePath}" is larger than 500KB`,
         points: 2,
       });
+    }
+
+    if (isOversized) {
+      oversizedImagesCount++;
     }
 
     // Deduct for metadata presence (-3 points)
@@ -160,7 +166,6 @@ export async function runDoctorAudit(files: ScannedFile[], config?: AssetFlowCon
       if (metadata.exif || metadata.iptc || metadata.xmp || metadata.icc) {
         hasMetadata = true;
         metadataCount++;
-        healthScore -= 3;
         deductions.push({
           reason: `Image "${file.relativePath}" contains embedded metadata`,
           points: 3,
@@ -183,7 +188,6 @@ export async function runDoctorAudit(files: ScannedFile[], config?: AssetFlowCon
 
     if (!hasOptimizedVersion) {
       missingAlternativesCount++;
-      healthScore -= 5;
       deductions.push({
         reason: `Image "${file.relativePath}" lacks optimized WebP or AVIF alternative`,
         points: 5,
@@ -191,8 +195,9 @@ export async function runDoctorAudit(files: ScannedFile[], config?: AssetFlowCon
     }
 
     // Estimate file-specific savings
+    // If the file already has an optimized version, its potential savings are 0!
     const savingsRatio = file.extension === 'png' ? pngSavingsRatio : jpgSavingsRatio;
-    const fileSavings = Math.round(size * savingsRatio);
+    const fileSavings = hasOptimizedVersion ? 0 : Math.round(size * savingsRatio);
     potentialSavingsBytes += fileSavings;
 
     savingsOpportunities.push({
@@ -213,8 +218,26 @@ export async function runDoctorAudit(files: ScannedFile[], config?: AssetFlowCon
     });
   }
 
+  // Calculate weighted health score
+  if (sourceImages.length === 0) {
+    healthScore = 100;
+  } else {
+    const sizeEfficiencyScore = totalSize > 0
+      ? (1 - (potentialSavingsBytes / totalSize)) * 100
+      : 100;
+
+    const modernFormatsScore = ((sourceImages.length - missingAlternativesCount) / sourceImages.length) * 100;
+    const oversizedAssetsScore = ((sourceImages.length - oversizedImagesCount) / sourceImages.length) * 100;
+    const metadataHygieneScore = ((sourceImages.length - metadataCount) / sourceImages.length) * 100;
+
+    healthScore = (sizeEfficiencyScore * 0.40) +
+                  (modernFormatsScore * 0.25) +
+                  (oversizedAssetsScore * 0.25) +
+                  (metadataHygieneScore * 0.10);
+  }
+
   // Cap healthScore securely to stay between 0 and 100
-  healthScore = Math.min(100, Math.max(0, healthScore));
+  healthScore = Math.min(100, Math.max(0, Math.round(healthScore)));
 
   // Generate actionable recommendations
   const recommendations: string[] = [];

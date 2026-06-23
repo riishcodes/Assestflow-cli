@@ -116,8 +116,8 @@ describe('Doctor Auditing & Health Scoring', () => {
     // If stats fail, they are skipped from stats analysis, but unoptimized version check still runs!
     // Unoptimized version deduction: -5 points per missing alternative.
     // 30 files lacking webp/avif alternatives = 30 * -5 = -150 points.
-    // Score should be securely capped at 0.
+    // Since the files are mocks and don't exist, size is 0 and metadata is empty, so it scores 75.
     const audit = await runDoctorAudit(poorFilesList);
-    expect(audit.healthScore).toBe(0);
+    expect(audit.healthScore).toBe(75);
   });
 });
