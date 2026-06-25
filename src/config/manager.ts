@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2026 AssetFlow.
+ *
+ * Licensed under the AssetFlow Community License.
+ * Commercial use requires a commercial license.
+ *
+ * https://flow.riish.in
+ */
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { ConfigSchema, getDefaultConfig, type AssetFlowConfig } from './schema.js';

@@ -1,21 +1,33 @@
-MIT License
+AssetFlow Community License v1.0
 
-Copyright (c) 2026 AssetFlow Author
+Copyright (c) 2026 AssetFlow. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This License governs your use, copying, modification, and distribution of the software known as AssetFlow (including its source code, documentation, and compiled binaries, collectively referred to as the "Software").
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+By using, copying, modifying, or distributing the Software, you accept and agree to the terms of this License. If you do not agree, you do not have permission to use the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+1. PERMITTED USES
+
+Subject to the conditions and restrictions below, you are granted a non-exclusive, non-transferable, royalty-free, worldwide license to:
+- Use and execute the Software for personal, non-commercial purposes.
+- Inspect and study the source code of the Software for educational, research, and evaluation purposes.
+- Modify the Software solely for your own personal, non-commercial use.
+- Distribute modifications and contributions back to the official AssetFlow repository under the repository's contribution guidelines.
+
+2. RESTRICTIONS
+
+This License does NOT permit, and you shall not engage in, any of the following activities:
+- Commercial Use: You may not use the Software or any derivative works for commercial purposes. This includes, but is not limited to, using the Software in commercial products, using the Software for internal business purposes within a company, agency, or startup, or utilizing the Software to provide paid services.
+- Selling: You may not sell, rent, lease, sublicense, or otherwise distribute the Software or derivative works for commercial fees.
+- Competing Products & SaaS: You may not offer the Software as a hosted service, Software-as-a-Service (SaaS), cloud service, or as part of a competing commercial product or developer tool.
+- Redistribution Outside Terms: You may not redistribute the Software or derivative works to third parties except under the terms of this License, and any such redistribution must preserve all copyright and license notices.
+- Alternative Branding: You may not publish modified versions of the Software under another name, or redistribute derivative works with rebranded identity, without prior written consent from AssetFlow.
+- Trademark: This license grants no rights to use the AssetFlow trademarks, logos, branding, or trade dress. See TRADEMARK.md.
+
+3. COMMERCIAL LICENSING
+
+If you wish to use the Software for commercial purposes, including use within an enterprise, agency, or commercial product, you must obtain a separate, written Commercial License from AssetFlow. See COMMERCIAL_LICENSE.md for details.
+
+4. DISCLAIMER OF WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

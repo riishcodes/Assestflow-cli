@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2026 AssetFlow.
+ *
+ * Licensed under the AssetFlow Community License.
+ * Commercial use requires a commercial license.
+ *
+ * https://flow.riish.in
+ */
 import chokidar from 'chokidar';
 import path from 'node:path';
 import type { AssetFlowConfig } from '../config/schema.js';

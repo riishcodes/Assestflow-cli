@@ -8,8 +8,21 @@
     "skipLibCheck": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "declaration": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "inlineSources": false,
+    "removeComments": true,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": [
+    "src/tests/**/*",
+    "src/tests",
+    "**/tests/**",
+    "**/benchmarks/**",
+    "**/examples/**",
+    "**/playground/**",
+    "**/scripts/**"
+  ]
 }

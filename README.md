@@ -16,7 +16,7 @@
     <img src="https://img.shields.io/npm/dm/assetflow-cli?style=flat-square&color=34d399" alt="downloads" />
   </a>
   <a href="LICENSE">
-    <img src="https://img.shields.io/npm/l/assetflow-cli?style=flat-square&color=475569" alt="license" />
+    <img src="https://img.shields.io/badge/License-AssetFlow--Community-38bdf8?style=flat-square" alt="license" />
   </a>
 </p>
 
@@ -262,4 +262,9 @@ Yes. It supports Next.js, Vite, React, Vue, and Astro structures, avoiding tempo
 
 ## 📄 License
 
-MIT
+AssetFlow Community Edition is source-available software licensed under the [AssetFlow Community License v1.0](LICENSE).
+
+- **Personal & Educational Use**: Free to use, inspect, modify, and contribute back. See [LICENSE](LICENSE).
+- **Commercial Use**: A paid commercial license is required for enterprise, startup, agency, or business production environments. See [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md) for details.
+- **Trademarks**: This license does not grant rights to use the AssetFlow name, logos, or brand identity. See [TRADEMARK.md](TRADEMARK.md) for branding policies.
+- **Security Policy**: For reporting vulnerabilities and security guidelines, see [SECURITY.md](SECURITY.md).

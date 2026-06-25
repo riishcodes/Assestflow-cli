@@ -1,0 +1,41 @@
+Copyright © 2026 AssetFlow. All rights reserved.
+
+AssetFlow™, the AssetFlow logo, branding, website design, documentation, and related assets are protected by copyright and trademark law.
+
+This Software compiles and/or links to third-party open-source components. The licensing terms for these components are detailed below:
+
+1. chalk (MIT License)
+   Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
+
+2. chokidar (MIT License)
+   Copyright (c) 2012-2019 Paul Miller (https://paulmillr.com) & Elan Shanker
+
+3. commander (MIT License)
+   Copyright (c) 2011 TJ Holowaychuk <tj@vision-media.ca>
+
+4. execa (MIT License)
+   Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
+
+5. fast-glob (MIT License)
+   Copyright (c) Denis Malinochkin
+
+6. gradient-string (MIT License)
+   Copyright (c) Boris YHV <boris.yhv@gmail.com>
+
+7. log-update (MIT License)
+   Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
+
+8. ora (MIT License)
+   Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
+
+9. pretty-bytes (MIT License)
+   Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
+
+10. sharp (Apache License 2.0)
+    Copyright 2013 Lovell Fuller and contributors
+
+11. string-width (MIT License)
+    Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
+
+12. zod (MIT License)
+    Copyright (c) 2020 Colin McDonnell
